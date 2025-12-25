@@ -4,23 +4,23 @@
 session_start();
 require_once '../config/db.php';
 
-// 会话检查
+// Session check
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
     header('Location: ../users/login.php');
     exit;
 }
 
-// 获取卖家信息
+// Get seller information
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $seller = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// 处理订单状态更新
+// Handle order status updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset($_POST['status'])) {
     $orderId = $_POST['order_id'];
     $newStatus = $_POST['status'];
     
-    // 验证订单是否属于该卖家
+    // Verify order belongs to this seller
     $checkStmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM order_items oi
@@ -30,28 +30,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['order_id']) && isset(
     $checkStmt->execute([$orderId, $_SESSION['user_id']]);
     
     if ($checkStmt->fetchColumn() > 0) {
-        // 更新订单状态
+        // Update order status
         $updateStmt = $pdo->prepare("UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?");
         $updateStmt->execute([$newStatus, $orderId]);
         
-        // 设置成功消息
-        $_SESSION['success_message'] = "订单状态已成功更新。";
+        // Set success message
+        $_SESSION['success_message'] = "Order status has been successfully updated.";
     } else {
-        $_SESSION['error_message'] = "您无权更新此订单。";
+        $_SESSION['error_message'] = "You do not have permission to update this order.";
     }
     
     header("Location: sales.php");
     exit;
 }
 
-// 获取订单列表
+// Get order list
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : 'all';
 $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
 
-// 构建查询条件
+// Build query conditions
 $whereClause = "WHERE p.user_id = ?";
 $params = [$_SESSION['user_id']];
 
@@ -66,7 +66,7 @@ if (!empty($searchQuery)) {
     $params = array_merge($params, [$searchParam, $searchParam, $searchParam]);
 }
 
-// 获取订单总数（用于分页）
+// Get total order count (for pagination)
 $countStmt = $pdo->prepare("
     SELECT COUNT(DISTINCT o.id) as total
     FROM orders o
@@ -79,7 +79,7 @@ $countStmt->execute($params);
 $totalOrders = $countStmt->fetchColumn();
 $totalPages = ceil($totalOrders / $perPage);
 
-// 获取订单列表（包含卖家的产品）
+// Get order list (includes seller's products)
 $ordersStmt = $pdo->prepare("
     SELECT 
         o.id as order_id,
@@ -106,7 +106,7 @@ $params[] = $offset;
 $ordersStmt->execute($params);
 $orderItems = $ordersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 处理订单数据，按订单ID分组
+// Process order data, group by order ID
 $orders = [];
 foreach ($orderItems as $item) {
     $orderId = $item['order_id'];
@@ -130,7 +130,7 @@ foreach ($orderItems as $item) {
     ];
 }
 
-// 获取订单状态选项
+// Get order status options
 $statusOptions = [
     'pending' => 'Pending Payment',
     'paid' => 'Paid',
@@ -139,7 +139,7 @@ $statusOptions = [
     'cancelled' => 'Cancelled'
 ];
 
-// 订单状态的CSS类映射
+// CSS class mapping for order status
 $statusClasses = [
     'pending' => 'text-amber-500',
     'paid' => 'text-blue-500',
@@ -162,7 +162,7 @@ $statusClasses = [
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FF4400', // 淘宝橙色
+                        primary: '#FF4400', // Taobao orange
                         secondary: '#FFB800',
                         dark: '#333333',
                         light: '#F5F5F5',
@@ -234,7 +234,7 @@ $statusClasses = [
     </style>
 </head>
 <body class="bg-gray-light font-inter text-gray-dark min-h-screen flex flex-col">
-    <!-- 顶部导航 -->
+
     <header class="taobao-header py-2">
         <div class="container mx-auto px-4 flex items-center justify-between">
             <div class="flex items-center">
@@ -272,7 +272,7 @@ $statusClasses = [
         </div>
     </header>
 
-    <!-- 卖家中心导航 -->
+
     <nav class="seller-nav">
         <div class="container mx-auto px-4">
             <ul class="flex">
@@ -287,15 +287,15 @@ $statusClasses = [
         </div>
     </nav>
 
-    <!-- 主内容区 -->
+
     <main class="flex-1 container mx-auto px-4 py-6">
-        <!-- 页面标题 -->
+
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Sales Management</h1>
             <p class="text-gray-dark mt-1">Manage and process your orders</p>
         </div>
         
-        <!-- 消息提示 -->
+
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md relative mb-6" role="alert">
                 <div class="flex items-center">
@@ -324,7 +324,7 @@ $statusClasses = [
             <?php unset($_SESSION['error_message']); ?>
         <?php endif; ?>
         
-        <!-- 筛选和搜索 -->
+
         <div class="bg-white rounded-sm border border-gray-medium mb-6">
             <div class="p-4">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
@@ -371,12 +371,12 @@ $statusClasses = [
             </div>
         </div>
         
-        <!-- 订单列表 -->
+
         <div class="mb-6">
             <?php if (!empty($orders)): ?>
                 <?php foreach ($orders as $orderId => $order): ?>
                     <div class="order-card">
-                        <!-- 订单头部信息 -->
+
                         <div class="order-header">
                             <div class="flex items-center">
                                 <span class="text-sm font-medium text-gray-900 mr-6">#<?php echo $order['id']; ?></span>
@@ -396,7 +396,7 @@ $statusClasses = [
                             </div>
                         </div>
                         
-                        <!-- 订单商品信息 -->
+
                         <div class="order-items">
                             <?php foreach ($order['items'] as $index => $item): ?>
                                 <div class="order-item <?php echo ($index > 0) ? 'border-t border-gray-light' : ''; ?>">
@@ -421,7 +421,7 @@ $statusClasses = [
                             <?php endforeach; ?>
                         </div>
                         
-                        <!-- 订单底部信息 -->
+
                         <div class="order-footer">
                             <div class="text-right">
                                 <p class="text-sm text-gray-dark mb-1">Subtotal: R<?php echo number_format($order['total'], 2); ?></p>
@@ -454,7 +454,7 @@ $statusClasses = [
             <?php endif; ?>
         </div>
         
-        <!-- 分页 -->
+
         <div class="flex items-center justify-between">
             <div class="text-sm text-gray-dark">
                 <?php if ($totalOrders > 0): ?>
@@ -500,7 +500,7 @@ $statusClasses = [
         </div>
     </main>
 
-    <!-- 页脚 -->
+
     <footer class="bg-white border-t border-gray-medium mt-8">
         <div class="container mx-auto px-4 py-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -553,7 +553,7 @@ $statusClasses = [
         </div>
     </footer>
 
-    <!-- 订单状态更新模态框 -->
+
     <div id="status-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-sm w-full max-w-md mx-4 transform transition-all">
             <div class="p-4 border-b border-gray-medium flex items-center justify-between">
@@ -590,19 +590,19 @@ $statusClasses = [
     </div>
 
     <script>
-        // 搜索订单
+        // Search orders
         function searchOrders() {
             const search = document.getElementById('search-orders').value;
             const status = '<?php echo $statusFilter; ?>';
             window.location.href = `sales.php?search=${encodeURIComponent(search)}${status !== 'all' ? '&status=' + status : ''}`;
         }
         
-        // 查看订单详情
+        // View order details
         function viewOrderDetails(orderId) {
             window.location.href = `order-details.php?id=${orderId}`;
         }
         
-        // 状态更新模态框
+        // Status update modal
         function showStatusModal(orderId, currentStatus) {
             document.getElementById('modal-order-id').value = orderId;
             document.getElementById('modal-status').value = currentStatus;
@@ -613,20 +613,20 @@ $statusClasses = [
             document.getElementById('status-modal').classList.add('hidden');
         }
         
-        // 点击模态框外部关闭
+        // Close modal when clicking outside
         document.getElementById('status-modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 hideStatusModal();
             }
         });
         
-        // 下拉菜单
+        // Dropdown menu
         document.querySelector('button.flex.items-center.text-gray-dark').addEventListener('click', function() {
             const menu = this.parentElement.querySelector('div.hidden');
             menu.classList.toggle('hidden');
         });
         
-        // 点击其他区域关闭下拉菜单
+        // Close dropdown when clicking elsewhere
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('div.relative');
             if (!dropdown.contains(event.target)) {

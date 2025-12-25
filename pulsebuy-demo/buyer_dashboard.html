@@ -1,64 +1,3 @@
-<?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'buyer') {
-    header('Location: loginSignup.php');
-    exit;
-}
-require_once './config/db.php';
-
-try {
-    // Get user stats
-    $stats_stmt = $pdo->prepare("SELECT 
-                                COUNT(DISTINCT o.id) as total_orders,
-                                COALESCE(SUM(o.total_amount), 0) as total_spent,
-                                COUNT(DISTINCT oi.product_id) as unique_products,
-                                COUNT(DISTINCT uc.id) as coupon_count
-                             FROM orders o 
-                             LEFT JOIN order_items oi ON o.id = oi.order_id 
-                             LEFT JOIN user_coupons uc ON uc.user_id = o.user_id AND uc.used = 0
-                             WHERE o.user_id = ?");
-    $stats_stmt->execute([$_SESSION['user_id']]);
-    $user_stats = $stats_stmt->fetch(PDO::FETCH_ASSOC);
-    
-    // Get recent orders
-    $order_stmt = $pdo->prepare("SELECT o.id, o.total_amount, o.status, o.created_at, 
-                                (SELECT p.title 
-                                 FROM order_items oi 
-                                 JOIN products p ON oi.product_id = p.id 
-                                 WHERE oi.order_id = o.id 
-                                 ORDER BY oi.id 
-                                 LIMIT 1) as product_name,
-                                COUNT(oi.id) as item_count
-                         FROM orders o 
-                         LEFT JOIN order_items oi ON o.id = oi.order_id 
-                         WHERE o.user_id = ? 
-                         GROUP BY o.id 
-                         ORDER BY o.created_at DESC 
-                         LIMIT 10");
-    $order_stmt->execute([$_SESSION['user_id']]);
-    $orders = $order_stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Get available coupons for user
-    $coupon_stmt = $pdo->prepare("SELECT c.id, c.code, c.description, c.discount_type, 
-                                 c.discount_amount, c.expiry_date
-                          FROM user_coupons uc
-                          JOIN coupons c ON uc.coupon_id = c.id
-                          WHERE uc.user_id = ? 
-                          AND uc.used = 0
-                          AND (c.expiry_date IS NULL OR c.expiry_date >= CURDATE())");
-    $coupon_stmt->execute([$_SESSION['user_id']]);
-    $coupons = $coupon_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-} catch (PDOException $e) {
-    die("Error fetching data: " . $e->getMessage());
-}
-
-// Format currency
-function format_currency($amount) {
-    return 'R' . number_format($amount, 0);
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,21 +25,21 @@ function format_currency($amount) {
             --danger: #F44336;
             --white: #FFFFFF;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', 'Noto Sans KR', sans-serif;
         }
-        
+
         body {
-            background-color: #f0f2f5;
+            background-color: var(--background);
             color: var(--dark-text);
             line-height: 1.6;
             min-height: 100vh;
         }
-        
+
         /* Top Navigation */
         .top-nav {
             background-color: var(--primary-blue);
@@ -115,13 +54,13 @@ function format_currency($amount) {
             top: 0;
             z-index: 100;
         }
-        
+
         .logo-area {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
@@ -131,24 +70,24 @@ function format_currency($amount) {
             color: var(--white);
             text-decoration: none;
         }
-        
+
         .logo i {
             color: var(--accent-yellow);
             margin-right: 8px;
             font-size: 26px;
         }
-        
+
         .logo span {
             color: var(--accent-yellow);
         }
-        
+
         .search-container {
             flex: 1;
             max-width: 600px;
             margin: 0 30px;
             position: relative;
         }
-        
+
         .search-bar {
             width: 100%;
             padding: 12px 20px 12px 48px;
@@ -159,16 +98,16 @@ function format_currency($amount) {
             color: var(--white);
             transition: all 0.3s;
         }
-        
+
         .search-bar::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
-        
+
         .search-bar:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.25);
         }
-        
+
         .search-icon {
             position: absolute;
             left: 18px;
@@ -177,13 +116,13 @@ function format_currency($amount) {
             color: rgba(255, 255, 255, 0.7);
             font-size: 17px;
         }
-        
+
         .user-actions {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-        
+
         .user-link {
             display: flex;
             align-items: center;
@@ -196,11 +135,11 @@ function format_currency($amount) {
             transition: background 0.2s;
             font-size: 14px;
         }
-        
+
         .user-link:hover {
             background: rgba(255, 255, 255, 0.15);
         }
-        
+
         .nav-btn {
             padding: 8px 16px;
             background: rgba(255, 255, 255, 0.15);
@@ -212,11 +151,11 @@ function format_currency($amount) {
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .nav-btn:hover {
             background: rgba(255, 255, 255, 0.25);
         }
-        
+
         /* Main Navigation */
         .main-nav {
             background: var(--card-bg);
@@ -225,18 +164,18 @@ function format_currency($amount) {
             overflow-x: auto;
             scrollbar-width: none;
         }
-        
+
         .main-nav::-webkit-scrollbar {
             display: none;
         }
-        
+
         .nav-links {
             display: flex;
             list-style: none;
             gap: 25px;
             padding: 15px 0;
         }
-        
+
         .nav-link {
             color: var(--dark-text);
             text-decoration: none;
@@ -247,12 +186,12 @@ function format_currency($amount) {
             position: relative;
             transition: color 0.2s;
         }
-        
+
         .nav-link.active {
             color: var(--primary-blue);
             font-weight: 700;
         }
-        
+
         .nav-link.active:after {
             content: '';
             position: absolute;
@@ -263,14 +202,14 @@ function format_currency($amount) {
             background: var(--primary-blue);
             border-radius: 3px;
         }
-        
+
         /* Promotional Banner */
         .promo-banner {
             background: linear-gradient(to right, var(--primary-blue), var(--secondary-blue));
             color: white;
             padding: 16px 5%;
         }
-        
+
         .promo-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -280,7 +219,7 @@ function format_currency($amount) {
             flex-wrap: wrap;
             gap: 15px;
         }
-        
+
         .promo-text {
             font-size: 16px;
             font-weight: 500;
@@ -288,12 +227,12 @@ function format_currency($amount) {
             align-items: center;
             gap: 10px;
         }
-        
+
         .promo-text .username {
             font-weight: 700;
             margin: 0 4px;
         }
-        
+
         .promo-btn {
             background: white;
             color: var(--primary-blue);
@@ -306,13 +245,13 @@ function format_currency($amount) {
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
             font-size: 15px;
         }
-        
+
         .promo-btn:hover {
             background: #f5fff9;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
         }
-        
+
         /* Dashboard Layout */
         .dashboard-container {
             max-width: 1400px;
@@ -322,13 +261,13 @@ function format_currency($amount) {
             grid-template-columns: 1fr;
             gap: 25px;
         }
-        
+
         @media (min-width: 992px) {
             .dashboard-container {
                 grid-template-columns: 280px 1fr;
             }
         }
-        
+
         /* Account Features */
         .features-section {
             background: var(--card-bg);
@@ -337,7 +276,7 @@ function format_currency($amount) {
             box-shadow: var(--shadow-sm);
             margin-bottom: 25px;
         }
-        
+
         .section-title {
             font-size: 20px;
             font-weight: 700;
@@ -349,13 +288,13 @@ function format_currency($amount) {
             align-items: center;
             gap: 12px;
         }
-        
+
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 18px;
         }
-        
+
         .feature-card {
             background: #f9f9f9;
             border-radius: 10px;
@@ -366,20 +305,20 @@ function format_currency($amount) {
             position: relative;
             overflow: hidden;
         }
-        
+
         .feature-card:hover {
             transform: translateY(-3px);
             box-shadow: var(--shadow-md);
             border-color: #e0e0e0;
         }
-        
+
         .feature-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
         }
-        
+
         .feature-icon {
             width: 36px;
             height: 36px;
@@ -391,7 +330,7 @@ function format_currency($amount) {
             color: var(--primary-blue);
             font-size: 18px;
         }
-        
+
         .feature-link {
             color: var(--primary-blue);
             font-size: 14px;
@@ -401,31 +340,31 @@ function format_currency($amount) {
             align-items: center;
             gap: 6px;
         }
-        
+
         .feature-main {
             margin-top: 15px;
         }
-        
+
         .feature-amount {
             font-size: 28px;
             font-weight: 700;
             color: var(--primary-blue);
             margin: 8px 0;
         }
-        
+
         .feature-title {
             font-size: 17px;
             font-weight: 600;
             color: var(--dark-text);
         }
-        
+
         .feature-desc {
             font-size: 14px;
             color: var(--light-text);
             line-height: 1.5;
             margin-top: 5px;
         }
-        
+
         /* Sidebar */
         .sidebar {
             background: var(--card-bg);
@@ -436,7 +375,7 @@ function format_currency($amount) {
             top: 20px;
             height: fit-content;
         }
-        
+
         .sidebar-title {
             font-size: 22px;
             font-weight: 700;
@@ -446,7 +385,7 @@ function format_currency($amount) {
             align-items: center;
             gap: 12px;
         }
-        
+
         .sidebar-title-icon {
             width: 40px;
             height: 40px;
@@ -458,16 +397,16 @@ function format_currency($amount) {
             color: var(--primary-blue);
             font-size: 20px;
         }
-        
+
         .sidebar-menu {
             list-style: none;
         }
-        
+
         .sidebar-item {
             padding: 15px 0;
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-        
+
         .sidebar-link {
             color: var(--medium-text);
             text-decoration: none;
@@ -480,18 +419,18 @@ function format_currency($amount) {
             padding: 6px 10px;
             border-radius: 8px;
         }
-        
+
         .sidebar-link:hover, .sidebar-link.active {
             background: rgba(0, 86, 224, 0.08);
             color: var(--primary-blue);
         }
-        
+
         .sidebar-icon {
             width: 24px;
             text-align: center;
             font-size: 18px;
         }
-        
+
         /* Order History */
         .order-section {
             background: var(--card-bg);
@@ -500,7 +439,7 @@ function format_currency($amount) {
             box-shadow: var(--shadow-sm);
             margin-bottom: 30px;
         }
-        
+
         .order-header {
             display: flex;
             justify-content: space-between;
@@ -509,18 +448,18 @@ function format_currency($amount) {
             flex-wrap: wrap;
             gap: 20px;
         }
-        
+
         .filter-group {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-        
+
         .filter-label {
             font-size: 15px;
             color: var(--light-text);
         }
-        
+
         .filter-select {
             padding: 10px 15px;
             border: 1px solid var(--border-color);
@@ -529,17 +468,17 @@ function format_currency($amount) {
             font-size: 15px;
             min-width: 150px;
         }
-        
+
         .filter-text {
             font-size: 14px;
             color: var(--light-text);
             margin-left: 15px;
         }
-        
+
         .order-list {
             margin-top: 15px;
         }
-        
+
         .order-item {
             display: flex;
             justify-content: space-between;
@@ -551,32 +490,32 @@ function format_currency($amount) {
             align-items: center;
             transition: all 0.3s;
         }
-        
+
         .order-item:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-sm);
             border-color: #ddd;
         }
-        
+
         .order-info {
             display: flex;
             gap: 20px;
             align-items: center;
         }
-        
+
         .order-date {
             font-size: 15px;
             font-weight: 600;
             color: var(--medium-text);
             min-width: 100px;
         }
-        
+
         .order-product {
             font-size: 16px;
             font-weight: 500;
             max-width: 500px;
         }
-        
+
         .order-status {
             font-size: 14px;
             font-weight: 500;
@@ -584,29 +523,29 @@ function format_currency($amount) {
             border-radius: 15px;
             margin-left: 15px;
         }
-        
+
         .status-delivered {
             background: rgba(76, 175, 80, 0.15);
             color: var(--success);
         }
-        
+
         .status-processing {
             background: rgba(255, 152, 0, 0.15);
             color: var(--warning);
         }
-        
+
         .status-cancelled {
             background: rgba(244, 67, 54, 0.15);
             color: var(--danger);
         }
-        
+
         .order-price {
             font-weight: 700;
             color: var(--dark-text);
             font-size: 16px;
             margin-right: 10px;
         }
-        
+
         .order-action {
             background: var(--primary-blue);
             color: white;
@@ -621,11 +560,11 @@ function format_currency($amount) {
             align-items: center;
             gap: 8px;
         }
-        
+
         .order-action:hover {
             background: #0048b8;
         }
-        
+
         /* Invoice Section */
         .invoice-section {
             background: var(--card-bg);
@@ -633,25 +572,25 @@ function format_currency($amount) {
             padding: 30px;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .invoice-content {
             margin-top: 15px;
         }
-        
+
         .invoice-desc {
             font-size: 15px;
             color: var(--medium-text);
             margin-bottom: 20px;
             line-height: 1.6;
         }
-        
+
         .invoice-form {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
         }
-        
+
         .invoice-input {
             flex: 1;
             min-width: 300px;
@@ -660,7 +599,7 @@ function format_currency($amount) {
             border-radius: 8px;
             font-size: 15px;
         }
-        
+
         .invoice-btn {
             background: var(--primary-blue);
             color: white;
@@ -672,100 +611,100 @@ function format_currency($amount) {
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .invoice-btn:hover {
             background: #0048b8;
         }
-        
+
         /* No Orders Message */
         .no-orders {
             text-align: center;
             padding: 40px 20px;
             color: var(--medium-text);
         }
-        
+
         .no-orders-icon {
             font-size: 48px;
             color: var(--light-text);
             margin-bottom: 20px;
         }
-        
+
         /* Responsive Design */
         @media (max-width: 1100px) {
             .dashboard-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .sidebar {
                 position: relative;
                 top: 0;
                 margin-bottom: 25px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .top-nav {
                 padding: 15px;
             }
-            
+
             .logo {
                 font-size: 24px;
             }
-            
+
             .search-container {
                 order: 3;
                 width: 100%;
                 margin: 15px 0 0;
             }
-            
+
             .user-actions {
                 margin-left: auto;
             }
-            
+
             .features-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .order-header {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .order-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
             }
-            
+
             .order-actions {
                 width: 100%;
                 display: flex;
                 justify-content: flex-end;
             }
         }
-        
+
         @media (max-width: 480px) {
             .user-link span {
                 display: none;
             }
-            
+
             .nav-btn {
                 padding: 8px;
             }
-            
+
             .promo-container {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .promo-btn {
                 width: 100%;
             }
-            
+
             .invoice-form {
                 flex-direction: column;
             }
-            
+
             .invoice-input, .invoice-btn {
                 width: 100%;
             }
@@ -773,19 +712,19 @@ function format_currency($amount) {
     </style>
 </head>
 <body>
-    <!-- Top Navigation -->
+
     <nav class="top-nav">
         <div class="logo-area">
-            <a href="#" class="logo">
+            <a href="index.html" class="logo">
                 <i class="fas fa-bolt"></i> Pulse<span>Buy</span>
             </a>
         </div>
-        
+
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
             <input type="text" class="search-bar" placeholder="Search for products, brands and categories">
         </div>
-        
+
         <div class="user-actions">
             <a href="#" class="user-link">
                 <i class="fas fa-headset"></i>
@@ -797,18 +736,18 @@ function format_currency($amount) {
             </a>
             <a href="#" class="user-link">
                 <i class="fas fa-user"></i>
-                <span><?= htmlspecialchars($_SESSION['username'] ?? 'Customer') ?></span>
+                <span id="username">Buyer123</span>
             </a>
-            <a href="logout.php" class="nav-btn">
+            <a href="logout.html" class="nav-btn">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>log out</span>
             </a>
         </div>
     </nav>
-    
-    <!-- Dashboard Content -->
+
+
     <main class="dashboard-container">
-        <!-- Sidebar -->
+
         <div class="sidebar">
             <div class="sidebar-title">
                 <div class="sidebar-title-icon">
@@ -816,7 +755,7 @@ function format_currency($amount) {
                 </div>
                 <div>My PulseBuy</div>
             </div>
-            
+
             <ul class="sidebar-menu">
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link active">
@@ -856,15 +795,15 @@ function format_currency($amount) {
                 </li>
             </ul>
         </div>
-        
-        <!-- Main Content -->
+
+
         <div>
-            <!-- Account Features -->
+
             <div class="features-section">
                 <h2 class="section-title">
                     <i class="fas fa-wallet"></i> Account Summary
                 </h2>
-                
+
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="feature-header">
@@ -876,12 +815,12 @@ function format_currency($amount) {
                             </a>
                         </div>
                         <div class="feature-main">
-                            <div class="feature-amount"><?= $user_stats['total_orders'] ?? 0 ?></div>
+                            <div class="feature-amount" id="totalOrders">15</div>
                             <h3 class="feature-title">Total Orders</h3>
                             <p class="feature-desc">Orders placed with PulseBuy</p>
                         </div>
                     </div>
-                    
+
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">
@@ -892,12 +831,12 @@ function format_currency($amount) {
                             </a>
                         </div>
                         <div class="feature-main">
-                            <div class="feature-amount">R<?= number_format($user_stats['total_spent'] ?? 0, 2) ?></div>
+                            <div class="feature-amount" id="totalSpent">R12,345.67</div>
                             <h3 class="feature-title">Total Spent</h3>
                             <p class="feature-desc">Cumulative order value</p>
                         </div>
                     </div>
-                    
+
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">
@@ -908,12 +847,12 @@ function format_currency($amount) {
                             </a>
                         </div>
                         <div class="feature-main">
-                            <div class="feature-amount"><?= $user_stats['unique_products'] ?? 0 ?></div>
+                            <div class="feature-amount" id="uniqueProducts">28</div>
                             <h3 class="feature-title">Unique Products</h3>
                             <p class="feature-desc">Different products purchased</p>
                         </div>
                     </div>
-                    
+
                     <div class="feature-card">
                         <div class="feature-header">
                             <div class="feature-icon">
@@ -924,21 +863,21 @@ function format_currency($amount) {
                             </a>
                         </div>
                         <div class="feature-main">
-                            <div class="feature-amount"><?= $user_stats['coupon_count'] ?? 0 ?></div>
+                            <div class="feature-amount" id="discountCoupons">3</div>
                             <h3 class="feature-title">Discount Coupons</h3>
                             <p class="feature-desc">Available discount offers</p>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Order History -->
+
+
             <div class="order-section">
                 <div class="order-header">
                     <h2 class="section-title">
                         <i class="fas fa-history"></i> Recent Order History
                     </h2>
-                    
+
                     <div class="filter-group">
                         <span class="filter-label">for the past month</span>
                         <select class="filter-select" id="orderFilter">
@@ -950,58 +889,22 @@ function format_currency($amount) {
                         <span class="filter-text">up to (5 years)</span>
                     </div>
                 </div>
-                
+
                 <div class="order-list" id="orderList">
-                    <?php if (count($orders) > 0): ?>
-                        <?php foreach ($orders as $order): 
-                            $statusClass = '';
-                            if ($order['status'] == 'delivered') {
-                                $statusClass = 'status-delivered';
-                            } elseif ($order['status'] == 'processing') {
-                                $statusClass = 'status-processing';
-                            } elseif ($order['status'] == 'cancelled') {
-                                $statusClass = 'status-cancelled';
-                            }
-                        ?>
-                        <div class="order-item" data-status="<?= $order['status'] ?>">
-                            <div class="order-info">
-                                <div class="order-date"><?= date('Y-m-d', strtotime($order['created_at'])) ?></div>
-                                <div class="order-product">
-                                    <?= htmlspecialchars($order['product_name']) ?>
-                                    <?php if ($order['item_count'] > 1): ?>
-                                        and <?= $order['item_count'] - 1 ?> more
-                                    <?php endif; ?>
-                                </div>
-                                <div class="order-status <?= $statusClass ?>"><?= ucfirst($order['status']) ?></div>
-                            </div>
-                            <div class="order-price">R<?= number_format($order['total_amount'], 2) ?></div>
-                            <button class="order-action" data-order-id="<?= $order['id'] ?>">
-                                <i class="fas fa-eye"></i> View
-                            </button>
-                        </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="no-orders">
-                            <div class="no-orders-icon">
-                                <i class="fas fa-shopping-basket"></i>
-                            </div>
-                            <h3>No Orders Found</h3>
-                            <p>You haven't placed any orders yet. Start shopping to see them here.</p>
-                        </div>
-                    <?php endif; ?>
+
                 </div>
             </div>
-            
-            <!-- Invoice Section -->
+
+
             <div class="invoice-section">
                 <h2 class="section-title">
                     <i class="fas fa-file-invoice"></i> Receipt/Invoice Inquiry
                 </h2>
-                
+
                 <div class="invoice-content">
                     <p class="invoice-desc">Enter the order ID or product information to view detailed receipts and invoices.</p>
-                    
-                    <form action="invoice.php" method="GET" class="invoice-form">
+
+                    <form action="#" class="invoice-form" id="invoiceForm">
                         <input type="text" class="invoice-input" name="search" placeholder="Enter order ID or product name...">
                         <button type="submit" class="invoice-btn">
                             <i class="fas fa-search"></i> View Invoice
@@ -1011,103 +914,267 @@ function format_currency($amount) {
             </div>
         </div>
     </main>
-    
+
     <script>
-        // Interactive functionality
+        // Sample data for the dashboard
+        const dashboardData = {
+            username: "Buyer123",
+            totalOrders: 15,
+            totalSpent: 12345.67,
+            uniqueProducts: 28,
+            discountCoupons: 3,
+            recentOrders: [
+                {
+                    id: 1,
+                    date: "2024-03-15",
+                    productName: "Smartphone X Pro 256GB",
+                    status: "delivered",
+                    price: 8999.99,
+                    itemCount: 1
+                },
+                {
+                    id: 2,
+                    date: "2024-03-10",
+                    productName: "Wireless Noise-Canceling Headphones",
+                    status: "processing",
+                    price: 1499.99,
+                    itemCount: 1
+                },
+                {
+                    id: 3,
+                    date: "2024-03-05",
+                    productName: "Premium Cotton T-Shirt Pack (3 items)",
+                    status: "delivered",
+                    price: 299.99,
+                    itemCount: 3
+                },
+                {
+                    id: 4,
+                    date: "2024-02-28",
+                    productName: "Automatic Drip Coffee Maker",
+                    status: "cancelled",
+                    price: 599.99,
+                    itemCount: 1
+                },
+                {
+                    id: 5,
+                    date: "2024-02-20",
+                    productName: "Laptop Backpack + Wireless Mouse",
+                    status: "delivered",
+                    price: 849.50,
+                    itemCount: 2
+                }
+            ]
+        };
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return 'R' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'delivered': return 'status-delivered';
+                case 'processing': return 'status-processing';
+                case 'cancelled': return 'status-cancelled';
+                default: return '';
+            }
+        }
+
+        function getStatusText(status) {
+            return status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
+            const username = dashboardData.username;
+
+            // Update username in header
+            const usernameElement = document.getElementById('username');
+            if (usernameElement) {
+                usernameElement.textContent = username;
+            }
+
+            // Update account summary
+            document.getElementById('totalOrders').textContent = dashboardData.totalOrders;
+            document.getElementById('totalSpent').textContent = formatCurrency(dashboardData.totalSpent);
+            document.getElementById('uniqueProducts').textContent = dashboardData.uniqueProducts;
+            document.getElementById('discountCoupons').textContent = dashboardData.discountCoupons;
+
+            // Render orders
+            renderOrders(dashboardData.recentOrders);
+
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        // Render orders to the page
+        function renderOrders(orders) {
+            const orderList = document.getElementById('orderList');
+            orderList.innerHTML = '';
+
+            if (orders.length === 0) {
+                orderList.innerHTML = `
+                    <div class="no-orders">
+                        <div class="no-orders-icon">
+                            <i class="fas fa-shopping-basket"></i>
+                        </div>
+                        <h3>No Orders Found</h3>
+                        <p>You haven't placed any orders yet. Start shopping to see them here.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            orders.forEach(order => {
+                const statusClass = getStatusClass(order.status);
+                const statusText = getStatusText(order.status);
+                const formattedPrice = formatCurrency(order.price);
+
+                const orderItem = document.createElement('div');
+                orderItem.className = 'order-item';
+                orderItem.setAttribute('data-status', order.status);
+                orderItem.innerHTML = `
+                    <div class="order-info">
+                        <div class="order-date">${order.date}</div>
+                        <div class="order-product">
+                            ${order.productName}
+                            ${order.itemCount > 1 ? ` and ${order.itemCount - 1} more` : ''}
+                        </div>
+                        <div class="order-status ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="order-price">${formattedPrice}</div>
+                    <button class="order-action" data-order-id="${order.id}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                `;
+
+                orderList.appendChild(orderItem);
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
             // Order filtering
             const orderFilter = document.getElementById('orderFilter');
-            const orderList = document.getElementById('orderList');
-            const orderItems = document.querySelectorAll('.order-item');
-            
-            orderFilter.addEventListener('change', function() {
-                const filterValue = this.value;
-                
-                orderItems.forEach(item => {
-                    if (filterValue === 'all' || item.getAttribute('data-status') === filterValue) {
-                        item.style.display = 'flex';
+            if (orderFilter) {
+                orderFilter.addEventListener('change', function() {
+                    const filterValue = this.value;
+                    const orderItems = document.querySelectorAll('.order-item');
+
+                    orderItems.forEach(item => {
+                        if (filterValue === 'all' || item.getAttribute('data-status') === filterValue) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+
+                    // Show no orders message if all are filtered out
+                    const visibleItems = Array.from(orderItems).filter(item =>
+                        item.style.display !== 'none');
+
+                    const orderList = document.getElementById('orderList');
+                    if (visibleItems.length === 0) {
+                        if (!document.querySelector('.no-orders')) {
+                            const noOrders = document.createElement('div');
+                            noOrders.className = 'no-orders';
+                            noOrders.innerHTML = `
+                                <div class="no-orders-icon">
+                                    <i class="fas fa-shopping-basket"></i>
+                                </div>
+                                <h3>No Orders Found</h3>
+                                <p>No orders match the selected filter.</p>
+                            `;
+                            orderList.appendChild(noOrders);
+                        }
                     } else {
-                        item.style.display = 'none';
+                        const noOrdersMsg = document.querySelector('.no-orders');
+                        if (noOrdersMsg) noOrdersMsg.remove();
                     }
                 });
-                
-                // Show no orders message if all are filtered out
-                const visibleItems = Array.from(orderItems).filter(item => 
-                    item.style.display !== 'none');
-                
-                if (visibleItems.length === 0) {
-                    if (!document.querySelector('.no-orders')) {
-                        const noOrders = document.createElement('div');
-                        noOrders.className = 'no-orders';
-                        noOrders.innerHTML = `
-                            <div class="no-orders-icon">
-                                <i class="fas fa-shopping-basket"></i>
-                            </div>
-                            <h3>No Orders Found</h3>
-                            <p>No orders match the selected filter.</p>
-                        `;
-                        orderList.appendChild(noOrders);
-                    }
-                } else {
-                    const noOrdersMsg = document.querySelector('.no-orders');
-                    if (noOrdersMsg) noOrdersMsg.remove();
+            }
+
+            // Order view functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.order-action')) {
+                    const button = e.target.closest('.order-action');
+                    const orderId = button.getAttribute('data-order-id');
+                    alert(`Opening order details for order #${orderId}`);
+                    // In a real application, you would redirect to order details page
+                    // window.location.href = `order_details.html?id=${orderId}`;
                 }
             });
-            
-            // Order view functionality
-            const viewButtons = document.querySelectorAll('.order-action');
-            viewButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const orderId = this.getAttribute('data-order-id');
-                    window.location.href = `order_details.php?id=${orderId}`;
-                });
-            });
-            
+
             // Feature card interactions
             const featureCards = document.querySelectorAll('.feature-card');
             featureCards.forEach(card => {
                 card.addEventListener('click', function() {
                     const title = this.querySelector('.feature-title').textContent;
-                    window.location.href = this.querySelector('.feature-link').href;
+                    alert(`Opening details for: ${title}`);
                 });
             });
-            
-            // Navigation active state
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
+
+            // Search functionality
+            const searchBar = document.querySelector('.search-bar');
+            if (searchBar) {
+                searchBar.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        alert(`Searching for: ${searchBar.value}`);
+                        // In a real application, you would redirect to search results page
+                        // window.location.href = `search.html?q=${encodeURIComponent(searchBar.value)}`;
+                    }
+                });
+            }
+
+            // Invoice form submission
+            const invoiceForm = document.getElementById('invoiceForm');
+            if (invoiceForm) {
+                invoiceForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
+                    const searchInput = this.querySelector('.invoice-input');
+                    alert(`Searching for invoice: ${searchInput.value}`);
+                    // In a real application, you would process the form
                 });
-            });
-            
-            // Sidebar active state
+            }
+
+            // Logout button
+            const logoutBtn = document.querySelector('.nav-btn[href*="logout"]');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to logout?')) {
+                        alert('Logging out...');
+                        // In a real application, you would redirect to logout page
+                        window.location.href = 'loginSignup.html';
+                    }
+                });
+            }
+
+            // Sidebar navigation
             const sidebarLinks = document.querySelectorAll('.sidebar-link');
             sidebarLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     sidebarLinks.forEach(l => l.classList.remove('active'));
                     this.classList.add('active');
+
+                    const menuText = this.querySelector('span:last-child').textContent;
+                    alert(`Navigating to: ${menuText}`);
                 });
             });
-            
-            // Search functionality
-            const searchBar = document.querySelector('.search-bar');
-            searchBar.addEventListener('keyup', (e) => {
-                if (e.key === 'Enter') {
-                    window.location.href = `search.php?q=${encodeURIComponent(searchBar.value)}`;
-                }
-            });
-            
-            // Logout button
-            const logoutBtn = document.querySelector('.logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    window.location.href = 'logout.php';
+
+            // Feature links
+            const featureLinks = document.querySelectorAll('.feature-link');
+            featureLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent triggering the parent card click
+                    e.preventDefault();
+                    alert('Opening details page...');
                 });
-            }
-        });
+            });
+        }
     </script>
 </body>
 </html>

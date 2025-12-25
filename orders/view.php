@@ -1,7 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 // File: orders/view.php
 
 session_start();
@@ -166,7 +163,7 @@ if ($role === 'buyer') {
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col font-sans text-gray-800 antialiased">
 
-    <!-- Top Navigation -->
+
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -180,7 +177,7 @@ if ($role === 'buyer') {
         </div>
     </header>
 
-     <!-- Main Content Area -->
+
     <div class="flex flex-1 bg-gray-100">
         <main class="flex-1 p-6 bg-gray-100">
             <div class="max-w-7xl mx-auto">
@@ -190,7 +187,7 @@ if ($role === 'buyer') {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <!-- Order Summary Card -->
+
                     <div class="card md:col-span-2">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Summary</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
@@ -228,7 +225,7 @@ if ($role === 'buyer') {
                         </div>
                     </div>
 
-                    <!-- Shipping Address Card -->
+
                     <div class="card">
                          <h3 class="text-lg font-semibold text-gray-800 mb-4">Shipping Address</h3>
                          <?php if ($address): ?>
@@ -245,7 +242,7 @@ if ($role === 'buyer') {
                     </div>
                 </div>
 
-                <!-- Order Items Table -->
+
                 <div class="card mb-8">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Items</h3>
                      <div class="overflow-x-auto">
@@ -266,8 +263,7 @@ if ($role === 'buyer') {
                                                  <img src="<?php echo htmlspecialchars($item['image'] ?? '../assets/images/no-image.png'); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-14 h-14 rounded-lg object-cover shadow-sm">
                                                 <div>
                                                      <p class="font-medium text-gray-900"><?php echo htmlspecialchars($item['name']); ?></p>
-                                                     <!-- Optional: Add a link to the product page if applicable -->
-                                                     <!-- <a href="../products/view.php?id=<?php echo $item['product_id']; ?>" class="text-primary hover:underline text-sm mt-1 inline-block">View Product</a> -->
+
                                                 </div>
                                             </div>
                                         </td>
@@ -286,7 +282,7 @@ if ($role === 'buyer') {
                      </div>
                 </div>
 
-                <!-- Back Button -->
+
                 <div class="text-center">
                     <a href="<?php echo ($role === 'seller') ? 'list.php' : '../buyer/orders.php'; ?>" class="inline-block bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors">
                         <i class="fa fa-arrow-left mr-2"></i> Back to Orders
@@ -297,7 +293,7 @@ if ($role === 'buyer') {
         </main>
     </div>
 
-    <!-- Footer -->
+
     <footer class="bg-gray-800 text-white py-8 mt-12">
         <div class="container mx-auto px-4 text-center">
             <p class="text-gray-400 text-sm">&copy; <?php echo date('Y'); ?> Taobao.com All rights reserved.</p>

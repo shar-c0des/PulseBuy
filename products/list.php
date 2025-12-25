@@ -2,12 +2,11 @@
 session_start();
 require_once '../config/db.php';
 
-$stmt = $pdo->query("SELECT p.name, p.price, p.description, i.image_url FROM products p 
-left join product_images i on p.id = i.product_id");
+$stmt = $pdo->query("SELECT p.title, p.price, p.description, p.image_path FROM products p");
 $products = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +49,7 @@ $products = $stmt->fetchAll();
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
-    <!-- 顶部导航 -->
+    <!-- Top Navigation -->
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center space-x-2 w-full md:w-auto">
@@ -85,7 +84,7 @@ $products = $stmt->fetchAll();
             </div>
         </div>
         
-        <!-- 二级导航 -->
+        <!-- Secondary Navigation -->
         <nav class="bg-white border-t border-gray-100">
             <div class="container mx-auto px-4">
                 <ul class="flex overflow-x-auto whitespace-nowrap py-2 text-sm">
@@ -124,31 +123,31 @@ $products = $stmt->fetchAll();
         </nav>
     </header>
 
-    <!-- 主要内容区 -->
+
     <main class="flex-1 container mx-auto px-4 py-6">
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800">All Products</h1>
             <p class="text-gray-500 mt-1">Discover over 1 billion products</p>
         </div>
         
-        <!-- 筛选工具栏 -->
+        <!-- Filter Toolbar -->
         <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
             <div class="flex flex-wrap items-center space-x-4">
                 <div class="flex items-center space-x-6">
-                    <button class="text-primary font-medium">综合</button>
-                    <button class="text-gray-600 hover:text-primary transition-colors">销量</button>
-                    <button class="text-gray-600 hover:text-primary transition-colors">价格</button>
-                    <button class="text-gray-600 hover:text-primary transition-colors">新品</button>
-                    <button class="text-gray-600 hover:text-primary transition-colors">信用</button>
+                    <button class="text-primary font-medium">General</button>
+                    <button class="text-gray-600 hover:text-primary transition-colors">Sales</button>
+                    <button class="text-gray-600 hover:text-primary transition-colors">Price</button>
+                    <button class="text-gray-600 hover:text-primary transition-colors">New</button>
+                    <button class="text-gray-600 hover:text-primary transition-colors">Rating</button>
                 </div>
                 
                 <div class="ml-auto flex items-center space-x-4">
                     <div class="flex items-center space-x-2">
-                        <span class="text-gray-600">价格:</span>
+                        <span class="text-gray-600">Price:</span>
                         <input type="number" placeholder="¥" class="w-20 py-1 px-2 border border-gray-300 rounded text-sm" />
                         <span class="text-gray-400">-</span>
                         <input type="number" placeholder="¥" class="w-20 py-1 px-2 border border-gray-300 rounded text-sm" />
-                        <button class="bg-primary text-white py-1 px-3 rounded text-sm">确定</button>
+                        <button class="bg-primary text-white py-1 px-3 rounded text-sm">Confirm</button>
                     </div>
                     
                     <div class="flex items-center space-x-2">
@@ -163,7 +162,7 @@ $products = $stmt->fetchAll();
             </div>
         </div>
         
-        <!-- 商品列表 -->
+
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <?php foreach ($products as $p): ?>
                 <div class="bg-white rounded-lg shadow-sm overflow-hidden product-card-hover">
@@ -172,7 +171,7 @@ $products = $stmt->fetchAll();
                              alt="<?php echo htmlspecialchars($p['name']); ?>" 
                              class="w-full h-64 object-cover">
                         <div class="absolute top-2 left-2">
-                            <span class="bg-primary text-white text-xs px-2 py-1 rounded">精选</span>
+                            <span class="bg-primary text-white text-xs px-2 py-1 rounded">Featured</span>
                         </div>
                     </div>
                     
@@ -198,27 +197,27 @@ $products = $stmt->fetchAll();
                                 <span class="text-gray-500 text-xs ml-1">4.5 (128)</span>
                             </div>
                             
-                            <span class="text-gray-500 text-xs">月销1.2万+</span>
+                            <span class="text-gray-500 text-xs">12K+ monthly sales</span>
                         </div>
                         
                         <div class="mt-3 flex items-center justify-between">
                             <div class="flex items-center">
                                 <i class="fa fa-shop text-gray-400"></i>
-                                <span class="text-gray-600 text-xs ml-1">官方旗舰店</span>
+                                <span class="text-gray-600 text-xs ml-1">Official Store</span>
                             </div>
                             
                             <div class="flex items-center text-gray-400 text-xs">
                                 <i class="fa fa-location-dot"></i>
-                                <span>广东</span>
+                                <span>Guangdong</span>
                             </div>
                         </div>
                         
                         <div class="mt-3 pt-3 border-t border-gray-100 flex justify-between">
                             <button class="text-gray-600 hover:text-primary transition-colors text-sm">
-                                <i class="fa fa-heart-o mr-1"></i>收藏
+                                <i class="fa fa-heart-o mr-1"></i>Favorites
                             </button>
                             <button class="text-primary hover:bg-primary/10 transition-colors text-sm px-3 py-1 rounded">
-                                <i class="fa fa-shopping-cart mr-1"></i>加入购物车
+                                <i class="fa fa-shopping-cart mr-1"></i>Add to Cart
                             </button>
                         </div>
                     </div>
@@ -226,7 +225,7 @@ $products = $stmt->fetchAll();
             <?php endforeach; ?>
         </div>
         
-        <!-- 分页 -->
+
         <div class="mt-8 flex justify-center">
             <nav class="flex items-center space-x-1">
                 <a href="#" class="px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:border-primary hover:text-primary transition-colors">
@@ -244,54 +243,54 @@ $products = $stmt->fetchAll();
         </div>
     </main>
 
-    <!-- 页脚 -->
+
     <footer class="bg-gray-800 text-white py-10 mt-10">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-lg font-bold mb-4">购物指南</h3>
+                    <h3 class="text-lg font-bold mb-4">Shopping Guide</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">新手上路</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">售后规则</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">消费者保障</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">争议处理</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Getting Started</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">After-sales Rules</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Consumer Protection</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Dispute Resolution</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold mb-4">付款方式</h3>
+                    <h3 class="text-lg font-bold mb-4">Payment Methods</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">支付宝</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">微信支付</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">银行卡支付</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">货到付款</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Alipay</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">WeChat Pay</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Bank Card</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Cash on Delivery</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold mb-4">商家服务</h3>
+                    <h3 class="text-lg font-bold mb-4">Merchant Services</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">商家入驻</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">商家中心</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">运营服务</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">培训中心</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Merchant Registration</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Merchant Center</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Operation Services</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Training Center</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold mb-4">手机淘宝</h3>
+                    <h3 class="text-lg font-bold mb-4">Mobile Taobao</h3>
                     <div class="bg-white p-2 inline-block rounded-lg">
-                        <img src="https://picsum.photos/100/100?random=101" alt="手机淘宝" class="w-24 h-24">
+                        <img src="https://picsum.photos/100/100?random=101" alt="Mobile Taobao" class="w-24 h-24">
                     </div>
-                    <p class="text-gray-400 text-sm mt-2">扫码下载手机淘宝</p>
+                    <p class="text-gray-400 text-sm mt-2">Scan to download Mobile Taobao</p>
                 </div>
             </div>
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2025 淘宝网 版权所有</p>
-                <p class="mt-2">消费者客服热线：400-800-8888</p>
+                <p>© 2025 Taobao All Rights Reserved</p>
+                <p class="mt-2">Customer Service Hotline: 400-800-8888</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // 商品卡片悬停效果
+        // Product card hover effect
         document.querySelectorAll('.product-card-hover').forEach(card => {
             card.addEventListener('mouseenter', () => {
                 card.style.transform = 'translateY(-5px)';
@@ -305,7 +304,7 @@ $products = $stmt->fetchAll();
             });
         });
         
-        // 滚动时导航栏效果
+        // Header scroll effect
         window.addEventListener('scroll', function() {
             const header = document.querySelector('header');
             if (window.scrollY > 50) {

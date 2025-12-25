@@ -295,7 +295,7 @@ $categories = $pdo->query("SELECT id, name FROM categories")->fetchAll();
                         </div>
                     </div>
                     
-                    <!-- Product Image Section -->
+
                     <div class="bg-gmarket-gray rounded-lg p-5">
                         <h2 class="text-lg font-semibold text-gmarket-dark mb-4 flex items-center section-title-underline pb-2">
                             <i class="fa fa-image text-gmarket-blue mr-2"></i>
@@ -325,7 +325,7 @@ $categories = $pdo->query("SELECT id, name FROM categories")->fetchAll();
                         <button type="button" id="removeImageBtn" style="display:none;background:#0c49c9;color:#fff;padding:8px 18px;border:none;border-radius:6px;font-weight:600;margin-top:10px;">Remove Photo</button>
                     </div>
                     
-                    <!-- Form Actions -->
+
                     <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                         <a href="/seller_dashboard.php" 
                             class="px-6 py-3 border border-gray-300 rounded-lg text-gmarket-medium font-medium btn-hover">
@@ -397,7 +397,7 @@ $categories = $pdo->query("SELECT id, name FROM categories")->fetchAll();
                     </div>
                 </div>
                 
-                <!-- Product Requirements Card -->
+
                 <div class="bg-white rounded-xl shadow-md p-6 animate-slide-up card-hover" style="animation-delay: 0.4s">
                     <div class="flex items-center mb-4">
                         <div class="w-10 h-10 rounded-full bg-gmarket-orange/10 flex items-center justify-center text-gmarket-orange">
@@ -473,7 +473,7 @@ $categories = $pdo->query("SELECT id, name FROM categories")->fetchAll();
                 <!-- Nose -->
                 <div class="absolute w-2 h-2 bg-gmarket-orange rounded-full top-8 left-6.5"></div>
                 
-                <!-- Mouth -->
+
                 <div class="absolute w-3 h-2 border-b-2 border-gmarket-orange rounded-full top-9 left-6"></div>
                 
                 <!-- Vest -->
@@ -482,7 +482,7 @@ $categories = $pdo->query("SELECT id, name FROM categories")->fetchAll();
                 <!-- Lightning Bolt -->
                 <div class="absolute w-3 h-5 bg-gmarket-yellow clip-path-polygon bottom-2 left-5.5 animate-pulse-slow"></div>
                 
-                <!-- Tail -->
+
                 <div class="absolute w-4 h-4 bg-white border-2 border-gmarket-blue rounded-full border-t-0 border-r-0 transform rotate-45 bottom-1 right-1"></div>
             </div>
         </div>

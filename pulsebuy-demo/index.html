@@ -1,15 +1,3 @@
-<?php
-session_start();
-
-require_once __DIR__ . '/config/db.php';
-// Fetch up to 8 featured/active products
-$stmt = $pdo->query('SELECT p.id, p.title, p.price, p.image_path, p.stock FROM products p WHERE p.status = "active" ORDER BY p.created_at DESC LIMIT 8');
-$products = $stmt->fetchAll();
-// Fetch up to 4 sellers for the homepage
-$sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER BY created_at DESC LIMIT 4")->fetchAll();
-
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -913,14 +901,14 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             .main-container {
                 flex-direction: column;
             }
-            
+
             .sidebar {
                 display: flex;
                 width: 100%;
                 flex-wrap: wrap;
                 gap: 20px;
             }
-            
+
             .quick-links, .ad-banner {
                 flex: 1;
                 min-width: calc(50% - 20px);
@@ -931,15 +919,15 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             .promo-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-            
+
             .feature-section {
                 grid-template-columns: 1fr;
             }
-            
+
             .hero-carousel {
                 height: 300px;
             }
-            
+
             .carousel-content {
                 max-width: 60%;
                 left: 30px;
@@ -952,40 +940,40 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                 align-items: flex-start;
                 gap: 12px;
             }
-            
+
             .brand-nav {
                 max-width: 100%;
                 justify-content: flex-start;
                 gap: 10px;
             }
-            
+
             .user-actions {
                 margin-left: 0;
             }
-            
+
             .main-nav {
                 justify-content: center;
             }
-            
+
             .nav-links {
                 justify-content: center;
                 gap: 15px;
             }
-            
+
             .search-box {
                 width: 100%;
             }
-            
+
             .carousel-content {
                 max-width: 80%;
                 top: 30px;
                 left: 20px;
             }
-            
+
             .promo-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .footer-content {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -995,7 +983,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             .promo-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .carousel-content {
                 position: relative;
                 max-width: 100%;
@@ -1004,39 +992,39 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                 top: 0;
                 left: 0;
             }
-            
+
             .carousel-link {
                 display: block;
                 margin: 0 auto;
                 width: fit-content;
             }
-            
+
             .carousel-controls {
                 bottom: 15px;
                 right: 15px;
             }
-            
+
             .feature-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .hero-area {
                 margin-bottom: 15px;
             }
-            
+
             .promo-banners {
                 display: none;
             }
-            
+
             .footer-content {
                 grid-template-columns: 1fr;
             }
-            
+
             .category-nav {
                 padding: 12px 5%;
                 gap: 15px;
             }
-            
+
             .section-header {
                 flex-direction: column;
                 align-items: flex-start;
@@ -1048,41 +1036,41 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             .top-nav {
                 padding: 10px 3%;
             }
-            
+
             .logo-area {
                 flex-direction: row;
             }
-            
+
             .logo-subtitle {
                 display: none;
             }
-            
+
             .user-actions {
                 flex-direction: column;
                 gap: 8px;
             }
-            
+
             .nav-links {
                 gap: 10px;
             }
-            
+
             .nav-links a {
                 font-size: 0.85rem;
             }
-            
+
             .carousel-content h2 {
                 font-size: 1.4rem;
             }
-            
+
             .carousel-content p {
                 font-size: 0.95rem;
                 margin-bottom: 15px;
             }
-            
+
             .promo-card {
                 max-width: 100%;
             }
-            
+
             .sidebar > * {
                 min-width: 100%;
             }
@@ -1095,26 +1083,19 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             <div class="logo"><i class="fas fa-bolt"></i> Pulse<span>Buy</span></div>
             <div class="logo-subtitle">South Africa's #1 C2C Marketplace</div>
         </div>
-        
+
         <div class="brand-nav">
             <a href="#">SUPER SALE</a>
             <a href="#">TODAY ONLY</a>
-            <a href="#">NEW USERS</a>
+            <a href=loginSignup.html>NEW USERS</a>
             <a href="#">GIFT CARDS</a>
             <a href="#">FLASH DEALS</a>
             <a href="#">CASH BACK</a>
             <a href="#">FREE SHIPPING</a>
         </div>
-        
+
         <div class="user-actions">
-            <?php if (isset($_SESSION['user_id']) && isset($_SESSION['username'])): ?>
-                <span style="margin-right:16px;font-weight:600;"><i class="fas fa-user"></i> <?= htmlspecialchars($_SESSION['username']) ?></span>
-                <a href="/profile.php"><i class="fas fa-user-cog"></i> Profile</a>
-                <a href="/logout.php"><i class="fas fa-sign-out-alt"></i> Log Out</a>
-            <?php else: ?>
-                <a href="/loginSignup.php"><i class="fas fa-user"></i> Sign In</a>
-                <a href="/register.php"><i class="fas fa-user-plus"></i> Join </a>
-            <?php endif; ?>
+            <a href=loginSignup.html><i class="fas fa-user"></i> Sign In /Join</a>
         </div>
     </div>
     <nav class="main-nav">
@@ -1127,20 +1108,20 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             <a href="#">Stores</a>
             <a href="#">Sell on PulseBuy</a>
         </div>
-        
+
         <div class="search-box">
-            <form action="/products.php" method="GET" class="search-bar-form">
+            <form action="#" class="search-bar-form">
                 <input type="text" name="search" placeholder="Search products..." class="search-bar-input">
                 <button type="submit" class="search-bar-btn"><i class="fas fa-search"></i></button>
             </form>
         </div>
     </nav>
     <div class="category-nav">
-        <a href="#" class="category-item">
+        <a href=products.html class="category-item">
             <div class="category-icon"><i class="fas fa-mobile-alt"></i></div>
             <div class="category-name">Electronics</div>
         </a>
-        <a href="#" class="category-item">
+        <a href=products.html class="category-item">
             <div class="category-icon"><i class="fas fa-tshirt"></i></div>
             <div class="category-name">Fashion</div>
         </a>
@@ -1177,8 +1158,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             <div class="category-name">Furniture</div>
         </a>
     </div>
-    
-    # flash sale timer
+
     <div class="flash-sale">
         <div>
             <i class="fas fa-bolt"></i> FLASH SALE - Ends in:
@@ -1195,35 +1175,59 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             <div class="hero-area">
                 <div class="hero-carousel">
                     <div class="carousel-slide active">
-                        <div class="carousel-img" style="background: linear-gradient(135deg, #5d9cec, #8bb8f0);">
+                       <div class="carousel-img" style="
+    background-image: url('https://i.pinimg.com/736x/66/5c/df/665cdf17166ee1429f852249da402b05.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: local;
+    width: 100%;
+    height: 500px;
+">
                             <div class="carousel-content">
                                 <h2>Mega Tech Sale</h2>
-                                <p>Save up to 60% on smartphones, laptops, and electronics. Limited time offer!</p>
-                                <a href="#" class="carousel-link">Shop Now</a>
+                                <p style="color:white">Save up to 60% on smartphones, laptops, and electronics. Limited time offer!</p>
+                                <a href=products.html class="carousel-link" style="border-radius: 10px; padding: 8px 15px; background-color: #007BFF; color: white; text-decoration: none; display: inline-block;">Shop Now</a>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="carousel-slide">
-                        <div class="carousel-img" style="background: linear-gradient(135deg, #ff9a9e, #fad0c4);">
+                        <div class="carousel-img" style="
+    background-image: url('https://i.pinimg.com/1200x/90/e8/fb/90e8fb22ecfdbd09c653e9d6de701f87.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: local;
+    width: 100%;
+    height: 500px;
+">
                             <div class="carousel-content">
                                 <h2>Summer Fashion Collection</h2>
-                                <p>New arrivals for the hottest season from top South African designers</p>
-                                <a href="#" class="carousel-link">Discover Styles</a>
+                                <p style="color:white">New arrivals for the hottest season from top South African designers</p>
+                                <a href=products.html class="carousel-link" style="border-radius: 10px; padding: 8px 15px; background-color: #007BFF; color: white; text-decoration: none; display: inline-block;">Discover Styles</a>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="carousel-slide">
-                        <div class="carousel-img" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);">
+                        <div class="carousel-img" style="
+    background-image: url('https://i.pinimg.com/1200x/23/1d/a4/231da4321f4251d63e6e44ba6bba3a51.jpg');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: local;
+    width: 100%;
+    height: 500px;
+">
                             <div class="carousel-content">
                                 <h2>Home & Kitchen Deals</h2>
-                                <p>Everything you need for your home at unbelievable prices</p>
-                                <a href="#" class="carousel-link">Explore Deals</a>
+                                <p style="color:white">Everything you need for your home at unbelievable prices</p>
+                                <a href=products.html class="carousel-link" style="border-radius: 10px; padding: 8px 15px; background-color: #007BFF; color: white; text-decoration: none; display: inline-block;">Explore Deals</a>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="carousel-pagination">
                         <div class="pagination-dot active"></div>
                         <div class="pagination-dot"></div>
@@ -1234,7 +1238,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                         <div class="carousel-control"><i class="fas fa-chevron-right"></i></div>
                     </div>
                 </div>
-                
+
                 <div class="promo-banners">
                     <div class="promo-banner" style="background: linear-gradient(135deg, #a18cd1, #fbc2eb);">
                         <div style="padding: 15px; color: white;">
@@ -1256,43 +1260,165 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     </div>
                 </div>
             </div>
-            
-            <!-- Daily Deals Section -->
+
             <div class="promo-section">
                 <div class="section-header">
                     <div class="section-title"><i class="fas fa-bolt"></i> Today's Best Deals</div>
-                    <a href="/products.php" class="view-all">View all</a>
+                    <a href=products.html class="view-all">View all</a>
                 </div>
                 <div class="promo-grid">
-                    <?php if (count($products) === 0): ?>
-                        <div style="grid-column: 1/-1; text-align: center; color: #888; font-size: 1.2em;">No products available.</div>
-                    <?php else: ?>
-                        <?php foreach ($products as $product): ?>
-                        <div class="promo-card">
-                            <div class="promo-img" style="background: #f5f5f5; display: flex; align-items: center; justify-content: center; height: 160px;">
-                                <img src="<?= htmlspecialchars($product['image_path']) ?>" alt="<?= htmlspecialchars($product['title']) ?>" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    <div class="promo-card">
+                       <div class="promo-img" style="
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+">
+    <img src="https://i.pinimg.com/736x/f2/42/a0/f242a096f258332ba96fa51f61360d39.jpg"
+         alt="Iphone 11"
+         style="
+             position: absolute;              top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+                        ">
+</div>
+                        <div class="promo-content">
+                            <h3 class="promo-title" style="height:auto;min-height:40px;overflow:hidden;">Smartphone X Pro - 256GB</h3>
+                            <div class="promo-price">R8,999.99</div>
+                            <div style="margin: 10px 0; color: #888; font-size: 0.95em;">
+                                In Stock
                             </div>
-                            <div class="promo-content">
-                                <h3 class="promo-title" style="height:auto;min-height:40px;overflow:hidden;"><?= htmlspecialchars($product['title']) ?></h3>
-                                <div class="promo-price">R<?= number_format($product['price'], 2) ?></div>
-                                <div style="margin: 10px 0; color: #888; font-size: 0.95em;">
-                                    <?= $product['stock'] > 0 ? 'In Stock' : 'Out of Stock' ?>
-                                </div>
-                                <form action="cart/add.php" method="POST" style="margin:0;">
-                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="pay-btn" style="width:100%;padding:10px 0;font-size:1rem;" <?= $product['stock'] > 0 ? '' : 'disabled style="opacity:0.6;cursor:not-allowed;"' ?>>
-                                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                                    </button>
-                                </form>
-                            </div>
+                            <form action="#" method="POST" style="margin:0;">
+                                <input type="hidden" name="product_id" value="1">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="pay-btn" style="width:100%;padding:10px 0;font-size:1rem; background:var(--primary-blue); color:white; border:none; border-radius:4px; cursor:pointer;">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </form>
                         </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    </div>
+
+                    <div class="promo-card">
+                        <div class="promo-img" style="
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+">
+    <img src="https://i.pinimg.com/1200x/e9/05/c5/e905c536c865d8b9c93d184aef1e45ec.jpg"
+         alt="Wireless Headphones"
+         style="
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+
+         ">
+</div>
+                        <div class="promo-content">
+                            <h3 class="promo-title" style="height:auto;min-height:40px;overflow:hidden;">Wireless Noise-Canceling Headphones</h3>
+                            <div class="promo-price">R1,499.99</div>
+                            <div style="margin: 10px 0; color: #888; font-size: 0.95em;">
+                                In Stock
+                            </div>
+                            <form action="#" method="POST" style="margin:0;">
+                                <input type="hidden" name="product_id" value="2">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="pay-btn" style="width:100%;padding:10px 0;font-size:1rem; background:var(--primary-blue); color:white; border:none; border-radius:4px; cursor:pointer;">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="promo-card">
+                        <div class="promo-img" style="
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+">
+    <img src="https://i.pinimg.com/1200x/d9/d9/87/d9d9873386239aac8983e0df1239fa2d.jpg"
+         alt="Cotton t-shirt"
+         style="
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+                        ">
+</div>
+                        <div class="promo-content">
+                            <h3 class="promo-title" style="height:auto;min-height:40px;overflow:hidden;">Premium Cotton T-Shirt - 3 Pack</h3>
+                            <div class="promo-price">R299.99</div>
+                            <div style="margin: 10px 0; color: #888; font-size: 0.95em;">
+                                In Stock
+                            </div>
+                            <form action="#" method="POST" style="margin:0;">
+                                <input type="hidden" name="product_id" value="3">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="pay-btn" style="width:100%;padding:10px 0;font-size:1rem; background:var(--primary-blue); color:white; border:none; border-radius:4px; cursor:pointer;">
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="promo-card">
+                        <div class="promo-img" style="
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 160px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+">
+    <img src="https://i.pinimg.com/1200x/ee/1c/03/ee1c0333c623e086b7f622ce967c8fed.jpg"
+         alt="Wireless Headphones"
+         style="
+             position: absolute;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             object-fit: cover;
+                        ">
+</div>
+                        <div class="promo-content">
+                            <h3 class="promo-title" style="height:auto;min-height:40px;overflow:hidden;">Automatic Drip Coffee Maker</h3>
+                            <div class="promo-price">R599.99</div>
+                            <div style="margin: 10px 0; color: #888; font-size: 0.95em;">
+                                Out of Stock
+                            </div>
+                            <form action="#" method="POST" style="margin:0;">
+                                <input type="hidden" name="product_id" value="4">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="pay-btn" style="width:100%;padding:10px 0;font-size:1rem; background:var(--primary-blue); color:white; border:none; border-radius:4px; opacity:0.6; cursor:not-allowed;" disabled>
+                                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Featured Categories -->
+
             <div class="feature-section">
                 <div class="feature-box">
                     <div class="feature-header">
@@ -1332,7 +1458,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                         </a>
                     </div>
                 </div>
-                
+
                 <div class="feature-box">
                     <div class="feature-header">
                         <div class="feature-icon">
@@ -1380,7 +1506,6 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     </div>
                 </div>
             </div>
-            
 
             <div class="promo-section">
                 <div class="section-header">
@@ -1388,50 +1513,69 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     <a href="#" class="view-all">View all stores</a>
                 </div>
                 <div class="promo-grid">
-                    <?php if (count($sellers) === 0): ?>
-                        <div style="grid-column: 1/-1; text-align: center; color: #888; font-size: 1.2em;">No sellers found.</div>
-                    <?php else: ?>
-                        <?php foreach ($sellers as $seller): ?>
-                        <div class="promo-card">
-                            <div class="promo-img" style="background: linear-gradient(135deg, #ffcc80, #ffa726);">
-                                <div style="text-align: center; padding: 20px; color: #333;">
-                                    <h3><?= htmlspecialchars($seller['username']) ?></h3>
-                                    <p>Seller</p>
-                                </div>
+                    <div class="promo-card">
+                        <div class="promo-img" style="background: linear-gradient(135deg, #ffcc80, #ffa726);">
+                            <div style="text-align: center; padding: 20px; color: #333;">
+                                <h3>TechGear SA</h3>
+                                <p>Electronics Seller</p>
                             </div>
                         </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    </div>
+                    <div class="promo-card">
+                        <div class="promo-img" style="background: linear-gradient(135deg, #ffcc80, #ffa726);">
+                            <div style="text-align: center; padding: 20px; color: #333;">
+                                <h3>FashionHub</h3>
+                                <p>Clothing & Accessories</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="promo-card">
+                        <div class="promo-img" style="background: linear-gradient(135deg, #ffcc80, #ffa726);">
+                            <div style="text-align: center; padding: 20px; color: #333;">
+                                <h3>Home Essentials</h3>
+                                <p>Home Goods Seller</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="promo-card">
+                        <div class="promo-img" style="background: linear-gradient(135deg, #ffcc80, #ffa726);">
+                            <div style="text-align: center; padding: 20px; color: #333;">
+                                <h3>AutoParts Direct</h3>
+                                <p>Automotive Specialist</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        # side bar
+
         <div class="sidebar">
             <div class="user-card">
                 <div class="user-avatar">
-                    <i class="fas fa-user"></i>
+                    <i class="fas fa-user" style="color: lightpink;"></i>
                 </div>
                 <div class="user-name">Welcome, Guest!</div>
                 <div class="user-status">Sign in for better experience</div>
-                <button style="width:100%; padding:10px; background:var(--primary-orange); color:white; border:none; border-radius:4px; margin-bottom:15px; font-weight:600; cursor:pointer;">
+                <a href="loginSignup.html" >
+                <button style="width:100%; padding:10px; background:orange; color:white; border:none; border-radius:4px; margin-bottom:15px; font-weight:600; cursor:pointer;">
                     Sign In / Register
-                </button>
+
+                </button> </a>
                 <div class="user-points">
                     <i class="fas fa-coins"></i> 0 PulseBuy Points
                 </div>
             </div>
-            
+
             <div class="quick-links">
                 <div class="links-header">Quick Actions</div>
                 <div class="links-grid">
-                    <a href="#" class="link-item">
+                    <a href=cart.html class="link-item">
                         <div class="link-icon">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
                         <div class="link-text">My Cart</div>
                     </a>
-                    <a href="#" class="link-item">
+                    <a href=wishlist.html class="link-item">
                         <div class="link-icon">
                             <i class="fas fa-heart"></i>
                         </div>
@@ -1475,7 +1619,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     </a>
                 </div>
             </div>
-            
+
             <div class="ad-banner">
                 <div style="padding:20px; text-align:center; background:#e3f2fd;">
                     <h3 style="color:var(--primary-blue);">Sell on PulseBuy</h3>
@@ -1487,8 +1631,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             </div>
         </div>
     </div>
-    
-    # footer
+
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-column">
@@ -1501,7 +1644,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     <li><a href="#">Returns & Refunds</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-column">
                 <h3>About PulseBuy</h3>
                 <ul class="footer-links">
@@ -1512,7 +1655,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     <li><a href="#">Terms & Privacy</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-column">
                 <h3>Payment Methods</h3>
                 <ul class="footer-links">
@@ -1523,7 +1666,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     <li><a href="#">Payment Security</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-column">
                 <h3>Connect With Us</h3>
                 <ul class="footer-links">
@@ -1540,9 +1683,9 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                 </ul>
             </div>
         </div>
-        
+
         <div class="copyright">
-            © 2023 PulseBuy (Pty) Ltd. South Africa's #1 C2C Marketplace. All Rights Reserved.
+            © 2025 PulseBuy (Pty) Ltd. South Africa's #1 C2C Marketplace. All Rights Reserved.
         </div>
     </footer>
 
@@ -1552,14 +1695,14 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
             const dots = document.querySelectorAll('.pagination-dot');
             const nextBtn = document.querySelector('.fa-chevron-right').closest('.carousel-control');
             const prevBtn = document.querySelector('.fa-chevron-left').closest('.carousel-control');
-            
+
             let currentSlide = 0;
             const slideCount = slides.length;
-            
+
             function showSlide(index) {
                 slides.forEach(slide => slide.classList.remove('active'));
                 dots.forEach(dot => dot.classList.remove('active'));
-                
+
                 slides[index].classList.add('active');
                 dots[index].classList.add('active');
                 dots[index].style.width = '28px';
@@ -1570,19 +1713,19 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                         dot.style.borderRadius = '50%';
                     }
                 });
-                
+
                 currentSlide = index;
             }
-            
+
             dots.forEach((dot, index) => {
                 dot.addEventListener('click', () => showSlide(index));
             });
-            
+
             nextBtn.addEventListener('click', () => {
                 let next = (currentSlide + 1) % slideCount;
                 showSlide(next);
             });
-            
+
             prevBtn.addEventListener('click', () => {
                 let prev = (currentSlide - 1 + slideCount) % slideCount;
                 showSlide(prev);
@@ -1591,7 +1734,7 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                 let next = (currentSlide + 1) % slideCount;
                 showSlide(next);
             }, 5000);
-            
+
             const carousel = document.querySelector('.hero-carousel');
             carousel.addEventListener('mouseenter', () => clearInterval(carouselInterval));
             carousel.addEventListener('mouseleave', () => {
@@ -1600,55 +1743,63 @@ $sellers = $pdo->query("SELECT username FROM users WHERE role = 'seller' ORDER B
                     showSlide(next);
                 }, 5000);
             });
-            const promoCards = document.querySelectorAll('.promo-card, .feature-item, .link-item');
-            promoCards.forEach(card => {
-                card.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    if(this.classList.contains('promo-card')) {
-                        const title = this.querySelector('.promo-title').textContent;
-                        alert(`Viewing product: "${title}"`);
-                    } else if(this.classList.contains('feature-item')) {
-                        const title = this.querySelector('h4').textContent;
-                        alert(`Navigating to: ${title}`);
-                    } else if(this.classList.contains('link-item')) {
-                        const text = this.querySelector('.link-text').textContent;
-                        alert(`Opening: ${text}`);
-                    }
-                });
-            });
+            const promoCards = document.querySelectorAll('.promo-card, .feature-item');
+promoCards.forEach(card => {
+    card.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        if(this.classList.contains('promo-card')) {
+            const title = this.querySelector('.promo-title')?.textContent || this.querySelector('h3').textContent;
+            alert(`Viewing: "${title}"`);
+        } else if(this.classList.contains('feature-item')) {
+            const title = this.querySelector('h4').textContent;
+            alert(`Navigating to: ${title}`);
+        }
+    });
+});
             const searchBox = document.querySelector('.search-box');
             const searchInput = searchBox.querySelector('input');
             const searchButton = searchBox.querySelector('button');
-            
+
             searchInput.addEventListener('focus', function() {
                 searchBox.style.boxShadow = '0 4px 12px rgba(0, 80, 181, 0.25)';
             });
-            
+
             searchInput.addEventListener('blur', function() {
                 searchBox.style.boxShadow = '0 2px 5px rgba(0,80,181,0.2)';
             });
-            
+
             searchButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 if(searchInput.value.trim() !== '') {
                     alert(`Searching for: "${searchInput.value}"`);
                 }
             });
-            
+
             searchInput.addEventListener('keypress', function(e) {
                 if(e.key === 'Enter') {
                     e.preventDefault();
                     searchButton.click();
                 }
             });
-        
+
             const signInButton = document.querySelector('.user-card button');
             signInButton.addEventListener('click', function() {
                 alert('Opening sign in/registration modal');
+            });
+
+
+            const cartForms = document.querySelectorAll('form[action="#"]');
+            cartForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const productTitle = this.closest('.promo-card').querySelector('.promo-title').textContent;
+                    if(!this.querySelector('button').disabled) {
+                        alert(`Added "${productTitle}" to cart! (No backend processing in pure frontend version)`);
+                    }
+                });
             });
         });
     </script>
 </body>
 </html>
-

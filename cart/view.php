@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 require_once '../config/db.php';
 
@@ -12,13 +8,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$sql = "SELECT cart.id, products.title, products.price, cart.quantity 
+$stmt = $pdo->prepare("SELECT cart.id, products.title, products.price, cart.quantity 
         FROM cart 
         JOIN products ON cart.product_id = products.id 
-        WHERE cart.user_id = $user_id";
-$result = $pdo->query($sql);
-
-$rows = $result->fetchAll(PDO::FETCH_ASSOC);
+        WHERE cart.user_id = ?");
+$stmt->execute([$user_id]);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total = 0;
 ?>
 

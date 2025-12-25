@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once '../../config/db.php';
+require_once 'config/db.php';
 
-// 验证用户登录状态
+// Verify user login status
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: loginSignup.php");
     exit;
 }
 
@@ -12,7 +12,7 @@ $userId = $_SESSION['user_id'];
 $wishlistItems = [];
 
 try {
-    // 查询用户愿望单
+    // Query user wishlist
     $stmt = $pdo->prepare("
         SELECT w.id as wishlist_id, p.* 
         FROM wishlist w 
@@ -22,10 +22,10 @@ try {
     $stmt->execute([$userId]);
     $wishlistItems = $stmt->fetchAll();
 } catch (PDOException $e) {
-    $error = "获取愿望单失败: " . $e->getMessage();
+    $error = "Failed to retrieve wishlist: " . $e->getMessage();
 }
 
-// 处理移除愿望单项目
+// Handle remove wishlist item
 if (isset($_GET['remove']) && is_numeric($_GET['remove'])) {
     $wishlistId = $_GET['remove'];
     try {
@@ -34,156 +34,535 @@ if (isset($_GET['remove']) && is_numeric($_GET['remove'])) {
         header("Location: wishlist.php");
         exit;
     } catch (PDOException $e) {
-        $error = "移除项目失败: " . $e->getMessage();
+        $error = "Failed to remove item: " . $e->getMessage();
     }
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的愿望单 - C2C电商平台</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#f97316',
-                        neutral: '#f8fafc',
-                    },
-                    fontFamily: {
-                        inter: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
+    <title>My Wishlist | PulseBuy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0056E0;
+            --secondary-blue: #1A75FF;
+            --accent-yellow: #FFC107;
+            --accent-green: #00C853;
+            --accent-red: #FF3D00;
+            --background: #F9FAFB;
+            --white: #FFFFFF;
+            --border-color: #F1F5F9;
+            --dark-text: #1E293B;
+            --medium-text: #64748B;
+            --light-text: #94A3B8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header & Navigation --- */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            color: var(--accent-yellow);
+            font-size: 24px;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .user-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--medium-text);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 13px;
+        }
+
+        .user-link:hover {
+            background: #F8FAFC;
+            color: var(--primary-blue);
+        }
+
+        .user-link.active {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            width: 100%;
+            flex: 1;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title-group h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-group h1 i {
+            color: var(--accent-red);
+            font-size: 20px;
+        }
+
+        .wishlist-count {
+            color: var(--light-text);
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        /* --- Product Grid --- */
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .wishlist-item {
+            background: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .wishlist-item:hover {
+            border-color: #E2E8F0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .product-image-wrapper {
+            position: relative;
+            padding-top: 100%;
+            background: #FBFBFC;
+            overflow: hidden;
+        }
+
+        .product-image-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 16px;
+        }
+
+        .badge-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 2;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge.sale {
+            background: var(--accent-red);
+            color: var(--white);
+        }
+
+        .badge.trending {
+            background: var(--accent-green);
+            color: var(--white);
+        }
+
+        .wishlist-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            z-index: 3;
+        }
+
+        .wishlist-btn:hover {
+            background: var(--accent-red);
+            color: var(--white);
+        }
+
+        .product-info {
+            padding: 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .current-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .original-price {
+            font-size: 14px;
+            color: var(--light-text);
+            text-decoration: line-through;
+        }
+
+        .discount {
+            background: var(--accent-red);
+            color: var(--white);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .add-to-cart-btn {
+            background: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: auto;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-1px);
+        }
+
+        /* --- Empty State --- */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--medium-text);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: var(--light-text);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            margin-bottom: 24px;
+            color: var(--medium-text);
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-1px);
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background: var(--dark-text);
+            color: var(--white);
+            padding: 40px 0 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .footer-section h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent-yellow);
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #94A3B8;
+            text-decoration: none;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-yellow);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 20px;
+            text-align: center;
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .main-content {
+                padding: 24px 16px;
+            }
+
+            .wishlist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 16px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
             }
         }
-    </script>
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
-            }
-            .product-card-hover {
-                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
-            }
-            .btn-primary {
-                @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
-            }
-            .btn-secondary {
-                @apply bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg transition-all duration-200;
-            }
-            .btn-danger {
-                @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200;
+
+        @media (max-width: 480px) {
+            .wishlist-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
-<body class="font-inter bg-neutral min-h-screen flex flex-col">
-    <!-- 导航栏 -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-shopping-bag text-primary text-2xl"></i>
-                <span class="text-xl font-bold text-gray-800">C2C电商平台</span>
-            </div>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.php" class="logo">
+                <i class="fas fa-bolt"></i> Pulse<span>Buy</span>
+            </a>
             
-            <nav class="hidden md:flex items-center space-x-6">
-                <a href="index.php" class="text-gray-700 hover:text-primary transition-colors">首页</a>
-                <a href="categories.php" class="text-gray-700 hover:text-primary transition-colors">分类</a>
-                <a href="wishlist.php" class="text-primary font-medium">愿望单</a>
-                <a href="cart.php" class="text-gray-700 hover:text-primary transition-colors relative">
-                    <i class="fa fa-shopping-cart"></i>
-                    <span class="absolute -top-2 -right-2 bg-secondary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+            <div class="user-actions">
+                <a href="index.php" class="user-link">
+                    <i class="fas fa-home"></i> Home
                 </a>
-            </nav>
-            
-            <div class="flex items-center space-x-4">
-                <div class="relative md:hidden">
-                    <button class="text-gray-700 focus:outline-none">
-                        <i class="fa fa-bars text-xl"></i>
-                    </button>
-                </div>
-                
-                <div class="relative hidden md:block">
-                    <input type="text" placeholder="搜索商品..." class="w-64 pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
-                    <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                </div>
-                
-                <div class="relative">
-                    <button class="flex items-center space-x-2 focus:outline-none">
-                        <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary">
-                        <span class="hidden md:inline-block text-gray-700 font-medium"><?php echo $_SESSION['username'] ?? '用户'; ?></span>
-                        <i class="fa fa-angle-down text-gray-500"></i>
-                    </button>
-                </div>
+                <a href="products.php" class="user-link">
+                    <i class="fas fa-shopping-bag"></i> Products
+                </a>
+                <a href="cart.php" class="user-link">
+                    <i class="fas fa-shopping-cart"></i> Cart
+                </a>
+                <a href="wishlist.php" class="user-link active">
+                    <i class="fas fa-heart"></i> Wishlist
+                </a>
+                <a href="profile.php" class="user-link">
+                    <i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['username'] ?? 'Profile'); ?>
+                </a>
+                <a href="logout.php" class="user-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
             </div>
         </div>
     </header>
 
-    <!-- 主内容区 -->
-    <main class="flex-grow container mx-auto px-4 py-8">
-        <div class="mb-8">
-            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800 mb-2">我的愿望单</h1>
-            <p class="text-gray-600">您收藏的商品都在这里，随时可以查看和购买</p>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div class="title-group">
+                <h1>
+                    <i class="fas fa-heart"></i>
+                    My Wishlist
+                </h1>
+                <div class="wishlist-count">
+                    <?php echo count($wishlistItems); ?> <?php echo count($wishlistItems) == 1 ? 'item' : 'items'; ?> saved
+                </div>
+            </div>
         </div>
 
         <?php if (isset($error)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
-                <strong class="font-bold">错误!</strong>
-                <span class="block sm:inline"><?php echo $error; ?></span>
+            <div style="background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                <strong>Error!</strong> <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
 
         <?php if (empty($wishlistItems)): ?>
-            <div class="bg-white rounded-xl shadow-sm p-8 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-                    <i class="fa fa-heart-o text-primary text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-semibold text-gray-800 mb-2">您的愿望单是空的</h3>
-                <p class="text-gray-600 mb-6">浏览商品并添加到愿望单，方便日后查看和购买</p>
-                <a href="index.php" class="btn-primary inline-flex items-center">
-                    <i class="fa fa-shopping-bag mr-2"></i> 开始购物
+            <div class="empty-state">
+                <i class="fas fa-heart"></i>
+                <h3>Your wishlist is empty</h3>
+                <p>Start adding products you love to your wishlist</p>
+                <a href="products.php" class="btn-primary">
+                    <i class="fas fa-shopping-bag"></i>
+                    Start Shopping
                 </a>
             </div>
         <?php else: ?>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="wishlist-grid">
                 <?php foreach ($wishlistItems as $item): ?>
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden product-card-hover">
-                        <div class="relative">
-                            <img src="<?php echo $item['image_path'] ?: 'https://picsum.photos/id/26/400/300'; ?>" 
-                                alt="<?php echo htmlspecialchars($item['title']); ?>" 
-                                class="w-full h-52 object-cover">
+                    <div class="wishlist-item">
+                        <div class="product-image-wrapper">
+                            <img src="<?php echo $item['image_path'] ?: 'https://picsum.photos/id/26/300/300'; ?>" 
+                                alt="<?php echo htmlspecialchars($item['title']); ?>">
+                            
+                            <div class="badge-container">
+                                <?php if (rand(1, 3) == 1): ?>
+                                    <span class="badge sale">Sale</span>
+                                <?php elseif (rand(1, 3) == 2): ?>
+                                    <span class="badge trending">Trending</span>
+                                <?php endif; ?>
+                            </div>
+                            
                             <button onclick="location.href='wishlist.php?remove=<?php echo $item['wishlist_id']; ?>'" 
-                                class="absolute top-3 right-3 bg-white/80 hover:bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200">
-                                <i class="fa fa-heart text-red-500"></i>
+                                class="wishlist-btn" title="Remove from wishlist">
+                                <i class="fas fa-heart"></i>
                             </button>
                         </div>
-                        <div class="p-4">
-                            <div class="flex items-center text-yellow-400 mb-2">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-half-o"></i>
-                                <span class="text-gray-600 text-sm ml-1">(42)</span>
-                            </div>
-                            <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2 h-12">
+                        
+                        <div class="product-info">
+                            <h3 class="product-title">
                                 <?php echo htmlspecialchars($item['title']); ?>
                             </h3>
-                            <p class="text-gray-600 text-sm mb-3 line-clamp-2 h-10">
-                                <?php echo htmlspecialchars(substr($item['description'], 0, 80)); ?>
-                            </p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-800">¥<?php echo number_format($item['price'], 2); ?></span>
-                                <button class="btn-primary text-sm py-1.5 px-3" onclick="addToCart(<?php echo $item['id']; ?>)">
-                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
-                                </button>
+                            
+                            <div class="product-price">
+                                <span class="current-price">R<?php echo number_format($item['price'], 2); ?></span>
+                                <?php if (rand(1, 3) == 1): ?>
+                                    <?php $originalPrice = $item['price'] * 1.2; ?>
+                                    <span class="original-price">R<?php echo number_format($originalPrice, 2); ?></span>
+                                    <span class="discount">20% OFF</span>
+                                <?php endif; ?>
                             </div>
+                            
+                            <button class="add-to-cart-btn" onclick="addToCart(<?php echo $item['id']; ?>)">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -191,109 +570,46 @@ if (isset($_GET['remove']) && is_numeric($_GET['remove'])) {
         <?php endif; ?>
     </main>
 
-    <!-- 页脚 -->
-    <footer class="bg-gray-800 text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <i class="fa fa-shopping-bag text-primary text-2xl"></i>
-                        <span class="text-xl font-bold">C2C电商平台</span>
-                    </div>
-                    <p class="text-gray-400 mb-4">连接买家与卖家的电子商务平台，让交易更简单。</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fa fa-facebook"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fa fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fa fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <i class="fa fa-linkedin"></i>
-                        </a>
-                    </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>About PulseBuy</h4>
+                    <p>South Africa's leading C2C marketplace connecting buyers and sellers across the country.</p>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">快速链接</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">商品分类</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">热门商品</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">最新上架</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li>
-                    </ul>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <a href="index.php">Home</a>
+                    <a href="products.php">Products</a>
+                    <a href="wishlist.php">Wishlist</a>
+                    <a href="cart.php">Cart</a>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">客户服务</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">帮助中心</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">联系我们</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">退换政策</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">隐私政策</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">用户协议</a></li>
-                    </ul>
+                <div class="footer-section">
+                    <h4>Customer Service</h4>
+                    <a href="#">Help Center</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">Returns</a>
+                    <a href="#">Shipping Info</a>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">联系我们</h4>
-                    <ul class="space-y-2">
-                        <li class="flex items-start space-x-3">
-                            <i class="fa fa-map-marker mt-1 text-primary"></i>
-                            <span class="text-gray-400">北京市朝阳区建国路88号</span>
-                        </li>
-                        <li class="flex items-center space-x-3">
-                            <i class="fa fa-phone text-primary"></i>
-                            <span class="text-gray-400">400-123-4567</span>
-                        </li>
-                        <li class="flex items-center space-x-3">
-                            <i class="fa fa-envelope text-primary"></i>
-                            <span class="text-gray-400">support@c2cplatform.com</span>
-                        </li>
-                    </ul>
-                    <div class="mt-4">
-                        <h5 class="text-sm font-medium mb-2">订阅我们的新闻</h5>
-                        <div class="flex">
-                            <input type="email" placeholder="您的邮箱地址" class="px-4 py-2 bg-gray-700 text-white rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary w-full">
-                            <button class="bg-primary hover:bg-primary/90 text-white px-4 rounded-r-lg transition-colors">
-                                <i class="fa fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <a href="#"><i class="fab fa-facebook"></i> Facebook</a>
+                    <a href="#"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
                 </div>
             </div>
-            
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-500 text-sm">
-                <p>&copy; 2025 C2C电商平台. 保留所有权利.</p>
+            <div class="footer-bottom">
+                <p>&copy; <?php echo date('Y'); ?> PulseBuy. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // 加入购物车功能
         function addToCart(productId) {
-            // 这里应该有AJAX请求添加商品到购物车
-            alert(`商品 ${productId} 已添加到购物车`);
+            // Add to cart functionality
+            alert('Product added to cart!');
         }
-
-        // 移动端菜单
-        document.querySelector('.fa-bars').parentElement.addEventListener('click', function() {
-            const nav = document.querySelector('nav');
-            nav.classList.toggle('hidden');
-            nav.classList.toggle('absolute');
-            nav.classList.toggle('top-16');
-            nav.classList.toggle('left-0');
-            nav.classList.toggle('w-full');
-            nav.classList.toggle('bg-white');
-            nav.classList.toggle('shadow-md');
-            nav.classList.toggle('p-4');
-            nav.classList.toggle('flex-col');
-            nav.classList.toggle('space-y-4');
-        });
     </script>
 </body>
-</html>    
+</html>

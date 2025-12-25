@@ -7,7 +7,7 @@
     <title>PulseBuy</title>
 </head>
 <body>
-<!-- Header Start -->
+
 <header>
     <h1>PulseBuy E-commerce</h1>
     <nav>

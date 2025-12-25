@@ -1,29 +1,29 @@
 <?php
 session_start();
 
-// 验证用户是否已登录且为卖家
+// Verify user is logged in and is a seller
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] !== 'seller') {
     header("Location: /login.php");
     exit;
 }
 
-require_once './config/db.php';
+require_once '../config/db.php';
 
 try {
     $seller_id = $_SESSION['user_id'];
     
-    // 分页设置
+    // Pagination settings
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = 10;
     $offset = ($page - 1) * $limit;
     
-    // 查询卖家的商品总数
+    // Query total number of products for the seller
     $countStmt = $pdo->prepare("SELECT COUNT(*) as total FROM products WHERE seller_id = ?");
     $countStmt->execute([$seller_id]);
     $total = $countStmt->fetchColumn();
     $totalPages = ceil($total / $limit);
     
-    // 查询当前页的商品
+    // Query products for current page
     $stmt = $pdo->prepare("SELECT p.id, p.name, p.price, p.stock, p.status, c.name AS category_name 
                            FROM products p 
                            LEFT JOIN categories c ON p.category_id = c.id 
@@ -33,15 +33,15 @@ try {
     $stmt->execute([$seller_id, $limit, $offset]);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("数据库错误: " . $e->getMessage());
+    die("Database error: " . $e->getMessage());
 }
 
-// 处理批量操作
+// Handle batch operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $selectedIds = isset($_POST['product_ids']) ? $_POST['product_ids'] : [];
     
     if (empty($selectedIds)) {
-        $_SESSION['message'] = ['type' => 'error', 'text' => '请选择商品'];
+        $_SESSION['message'] = ['type' => 'error', 'text' => 'Please select products'];
         header("Location: manage.php");
         exit;
     }
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 foreach ($selectedIds as $id) {
                     $updateStmt->execute([$id, $seller_id]);
                 }
-                $_SESSION['message'] = ['type' => 'success', 'text' => '所选商品已激活'];
+                $_SESSION['message'] = ['type' => 'success', 'text' => 'Selected products have been activated'];
                 break;
                 
             case 'deactivate':
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 foreach ($selectedIds as $id) {
                     $updateStmt->execute([$id, $seller_id]);
                 }
-                $_SESSION['message'] = ['type' => 'success', 'text' => '所选商品已禁用'];
+                $_SESSION['message'] = ['type' => 'success', 'text' => 'Selected products have been deactivated'];
                 break;
                 
             case 'delete':
@@ -69,14 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 foreach ($selectedIds as $id) {
                     $deleteStmt->execute([$id, $seller_id]);
                 }
-                $_SESSION['message'] = ['type' => 'success', 'text' => '所选商品已删除'];
+                $_SESSION['message'] = ['type' => 'success', 'text' => 'Selected products have been deleted'];
                 break;
                 
             default:
-                $_SESSION['message'] = ['type' => 'error', 'text' => '未知操作'];
+                $_SESSION['message'] = ['type' => 'error', 'text' => 'Unknown operation'];
         }
     } catch (PDOException $e) {
-        $_SESSION['message'] = ['type' => 'error', 'text' => '操作失败: ' . $e->getMessage()];
+        $_SESSION['message'] = ['type' => 'error', 'text' => 'Operation failed: ' . $e->getMessage()];
     }
     
     header("Location: manage.php");
@@ -85,11 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 ?>
 
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商品管理 - SellerHub</title>
+    <title>Product Management - SellerHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -173,11 +173,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </style>
 </head>
 <body class="font-inter bg-gray-50 text-gray-800 min-h-screen flex flex-col">
-    <!-- 顶部导航栏 -->
+
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
-                <!-- 左侧Logo和汉堡菜单 -->
+                <!-- Left logo and hamburger menu -->
                 <div class="flex items-center gap-4">
                     <button id="sidebar-toggle" class="lg:hidden text-gray-500 hover:text-primary">
                         <i class="fa fa-bars text-xl"></i>
@@ -190,15 +190,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     </a>
                 </div>
                 
-                <!-- 搜索栏 -->
+                <!-- Search bar -->
                 <div class="hidden md:block flex-grow max-w-xl mx-4">
                     <div class="relative">
-                        <input type="text" placeholder="搜索订单、商品..." class="form-input pl-10 w-full">
+                        <input type="text" placeholder="Search orders, products..." class="form-input pl-10 w-full">
                         <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                 </div>
                 
-                <!-- 右侧用户信息和通知 -->
+                <!-- Right user info and notifications -->
                 <div class="flex items-center gap-4">
                     <button class="relative p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-colors">
                         <i class="fa fa-bell-o text-xl"></i>
@@ -210,23 +210,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     </button>
                     <div class="relative group">
                         <button class="flex items-center gap-2">
-                            <img src="https://picsum.photos/id/64/200/200" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm">
-                            <span class="hidden md:block font-medium">王小明</span>
+                            <img src="https://picsum.photos/id/64/200/200" alt="User avatar" class="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm">
+                            <span class="hidden md:block font-medium">John Smith</span>
                             <i class="fa fa-angle-down text-gray-400"></i>
                         </button>
                         <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
                             <a href="#" class="dropdown-item flex items-center gap-2">
                                 <i class="fa fa-user-o text-gray-400"></i>
-                                <span>个人资料</span>
+                                <span>Profile</span>
                             </a>
                             <a href="#" class="dropdown-item flex items-center gap-2">
                                 <i class="fa fa-cog text-gray-400"></i>
-                                <span>账号设置</span>
+                                <span>Account Settings</span>
                             </a>
                             <div class="border-t border-gray-100 my-1"></div>
                             <a href="#" class="dropdown-item flex items-center gap-2 text-danger">
                                 <i class="fa fa-sign-out text-danger"></i>
-                                <span>退出登录</span>
+                                <span>Sign Out</span>
                             </a>
                         </div>
                     </div>
@@ -236,91 +236,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <!-- 侧边栏 -->
+
         <aside id="sidebar" class="w-64 bg-white shadow-sm border-r border-gray-100 transition-all duration-300 ease-in-out transform lg:translate-x-0 -translate-x-full fixed lg:relative h-[calc(100vh-4rem)] z-40 overflow-y-auto scrollbar-hide">
             <div class="p-4">
                 <div class="mb-6">
-                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">主导航</h2>
+                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">Main Navigation</h2>
                     <nav class="space-y-1">
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-dashboard w-5 text-center"></i>
-                            <span>仪表盘</span>
+                            <span>Dashboard</span>
                         </a>
                         <a href="#" class="sidebar-item active">
                             <i class="fa fa-tags w-5 text-center"></i>
-                            <span>商品管理</span>
+                            <span>Product Management</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-shopping-cart w-5 text-center"></i>
-                            <span>订单管理</span>
+                            <span>Order Management</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-users w-5 text-center"></i>
-                            <span>客户管理</span>
+                            <span>Customer Management</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-credit-card w-5 text-center"></i>
-                            <span>财务管理</span>
+                            <span>Financial Management</span>
                         </a>
                     </nav>
                 </div>
                 
                 <div class="mb-6">
-                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">营销中心</h2>
+                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">Marketing Center</h2>
                     <nav class="space-y-1">
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-bullhorn w-5 text-center"></i>
-                            <span>促销活动</span>
+                            <span>Promotions</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-percent w-5 text-center"></i>
-                            <span>优惠券管理</span>
+                            <span>Coupon Management</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-line-chart w-5 text-center"></i>
-                            <span>广告投放</span>
+                            <span>Advertising</span>
                         </a>
                     </nav>
                 </div>
                 
                 <div class="mb-6">
-                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">运营管理</h2>
+                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">Operations Management</h2>
                     <nav class="space-y-1">
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-truck w-5 text-center"></i>
-                            <span>物流配送</span>
+                            <span>Logistics</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-refresh w-5 text-center"></i>
-                            <span>退换货处理</span>
+                            <span>Returns & Exchanges</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-comments w-5 text-center"></i>
-                            <span>客户评价</span>
+                            <span>Customer Reviews</span>
                         </a>
                     </nav>
                 </div>
                 
                 <div class="mb-6">
-                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">数据中心</h2>
+                    <h2 class="text-xs uppercase font-semibold text-gray-400 tracking-wider mb-3">Data Center</h2>
                     <nav class="space-y-1">
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-bar-chart w-5 text-center"></i>
-                            <span>销售分析</span>
+                            <span>Sales Analytics</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-pie-chart w-5 text-center"></i>
-                            <span>流量分析</span>
+                            <span>Traffic Analytics</span>
                         </a>
                         <a href="#" class="sidebar-item">
                             <i class="fa fa-users w-5 text-center"></i>
-                            <span>用户分析</span>
+                            <span>User Analytics</span>
                         </a>
                     </nav>
                 </div>
             </div>
             
-            <!-- 侧边栏底部 -->
+            <!-- Sidebar Bottom -->
             <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-white">
                 <div class="bg-primary-light rounded-lg p-3">
                     <div class="flex items-start gap-3">
@@ -328,28 +328,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <i class="fa fa-rocket"></i>
                         </div>
                         <div>
-                            <h3 class="font-medium text-gray-800">升级专业版</h3>
-                            <p class="text-xs text-gray-600 mt-1">解锁更多高级功能，提升店铺业绩</p>
-                            <button class="btn btn-primary text-xs mt-2 w-full">立即升级</button>
+                            <h3 class="font-medium text-gray-800">Upgrade to Pro</h3>
+                            <p class="text-xs text-gray-600 mt-1">Unlock more advanced features to boost your store performance</p>
+                            <button class="btn btn-primary text-xs mt-2 w-full">Upgrade Now</button>
                         </div>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- 遮罩层 -->
+
         <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
 
-        <!-- 主内容区 -->
+        <!-- Main Content Area -->
         <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50">
             <div class="max-w-7xl mx-auto">
-                <!-- 页面标题 -->
+                <!-- Page Title -->
                 <div class="mb-6">
-                    <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800">商品管理</h1>
-                    <p class="text-gray-500 mt-1">管理您的所有商品，包括查看、编辑和删除操作</p>
+                    <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800">Product Management</h1>
+                    <p class="text-gray-500 mt-1">Manage all your products including viewing, editing and deleting operations</p>
                 </div>
                 
-                <!-- 消息提示 -->
+
                 <?php if (isset($_SESSION['message'])): ?>
                 <div class="mb-6">
                     <div class="alert alert-<?php echo $_SESSION['message']['type']; ?> p-4 rounded-lg">
@@ -357,19 +357,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     </div>
                 </div>
                 <?php unset($_SESSION['message']); endif; ?>
-                
-                <!-- 操作按钮 -->
+                 
+                <!-- Action Buttons -->
                 <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
                     <div class="flex flex-wrap gap-2">
                         <a href="add.php" class="btn btn-primary">
                             <i class="fa fa-plus mr-1"></i>
-                            <span>添加新商品</span>
+                            <span>Add New Product</span>
                         </a>
                         
                         <div class="relative group">
                             <button class="btn btn-secondary">
                                 <i class="fa fa-cog mr-1"></i>
-                                <span>批量操作</span>
+                                <span>Batch Operations</span>
                                 <i class="fa fa-angle-down ml-1"></i>
                             </button>
                             <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
@@ -377,20 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                     <input type="hidden" name="action" id="batch-action">
                                     <input type="hidden" name="product_ids" id="batch-product-ids">
                                     
-                                    <!-- Batch actions in Chinese commented out as not fully functional -->
-                                    <!-- <button type="button" onclick="setBatchAction('activate')" class="dropdown-item flex items-center gap-2">
-                                        <i class="fa fa-check-circle text-success"></i>
-                                        <span>激活选中商品</span>
-                                    </button>
-                                    <button type="button" onclick="setBatchAction('deactivate')" class="dropdown-item flex items-center gap-2">
-                                        <i class="fa fa-ban text-danger"></i>
-                                        <span>禁用选中商品</span>
-                                    </button>
-                                    <div class="border-t border-gray-100 my-1"></div>
-                                    <button type="button" onclick="setBatchAction('delete')" class="dropdown-item flex items-center gap-2 text-danger">
-                                        <i class="fa fa-trash"></i>
-                                        <span>删除选中商品</span>
-                                    </button> -->
+                                    <!-- Non-functional batch actions - commented out -->
                                 </form>
                             </div>
                         </div>
@@ -398,13 +385,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="relative">
-                            <input type="text" placeholder="搜索商品..." class="form-input pl-10 min-w-[200px]" id="search-input">
+                            <input type="text" placeholder="Search products..." class="form-input pl-10 min-w-[200px]" id="search-input">
                             <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                         </div>
                         <select class="form-input" id="category-filter">
-                            <option value="">所有分类</option>
+                            <option value="">All Categories</option>
                             <?php
-                            // 获取所有分类
+                            // Get all categories
                             $catStmt = $pdo->prepare("SELECT id, name FROM categories ORDER BY name");
                             $catStmt->execute();
                             $categories = $catStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -415,19 +402,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                             <?php endforeach; ?>
                         </select>
                         <select class="form-input" id="status-filter">
-                            <option value="">所有状态</option>
-                            <option value="active">活跃</option>
-                            <option value="pending">待审核</option>
-                            <option value="inactive">已禁用</option>
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="inactive">Inactive</option>
                         </select>
                         <button class="btn btn-secondary" id="filter-btn">
                             <i class="fa fa-filter mr-1"></i>
-                            <span>筛选</span>
+                            <span>Filter</span>
                         </button>
                     </div>
                 </div>
                 
-                <!-- 商品表格 -->
+                <!-- Product Table -->
                 <div class="card">
                     <div class="overflow-x-auto">
                         <form action="manage.php" method="POST">
@@ -437,13 +424,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                         <th class="pb-3 pr-4 w-10">
                                             <input type="checkbox" id="select-all">
                                         </th>
-                                        <th class="pb-3 pr-4">商品信息</th>
-                                        <th class="pb-3 pr-4">价格</th>
-                                        <th class="pb-3 pr-4">库存</th>
-                                        <th class="pb-3 pr-4">分类</th>
-                                        <th class="pb-3 pr-4">状态</th>
-                                        <th class="pb-3 pr-4">创建时间</th>
-                                        <th class="pb-3 text-right">操作</th>
+                                        <th class="pb-3 pr-4">Product Info</th>
+                                        <th class="pb-3 pr-4">Price</th>
+                                        <th class="pb-3 pr-4">Stock</th>
+                                        <th class="pb-3 pr-4">Category</th>
+                                        <th class="pb-3 pr-4">Status</th>
+                                        <th class="pb-3 pr-4">Created</th>
+                                        <th class="pb-3 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
@@ -466,21 +453,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                         <td class="py-3 pr-4 text-sm font-medium">¥<?php echo number_format($p['price'], 2); ?></td>
                                         <td class="py-3 pr-4 text-sm">
                                             <?php if ($p['stock'] <= 0): ?>
-                                                <span class="text-danger">无库存</span>
+                                                <span class="text-danger">No Stock</span>
                                             <?php elseif ($p['stock'] <= 10): ?>
-                                                <span class="text-warning">库存低 (<?php echo $p['stock']; ?>)</span>
+                                                <span class="text-warning">Low Stock (<?php echo $p['stock']; ?>)</span>
                                             <?php else: ?>
-                                                <span class="text-success">充足 (<?php echo $p['stock']; ?>)</span>
+                                                <span class="text-success">In Stock (<?php echo $p['stock']; ?>)</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="py-3 pr-4 text-sm"><?php echo htmlspecialchars($p['category_name']); ?></td>
                                         <td class="py-3 pr-4">
                                             <?php if ($p['status'] === 'active'): ?>
-                                                <span class="badge badge-success">活跃</span>
+                                                <span class="badge badge-success">Active</span>
                                             <?php elseif ($p['status'] === 'pending'): ?>
-                                                <span class="badge badge-warning">待审核</span>
+                                                <span class="badge badge-warning">Pending</span>
                                             <?php else: ?>
-                                                <span class="badge badge-danger">已禁用</span>
+                                                <span class="badge badge-danger">Disabled</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="py-3 pr-4 text-sm text-gray-600">
@@ -488,13 +475,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                         </td>
                                         <td class="py-3 text-right">
                                             <div class="flex items-center justify-end gap-2">
-                                                <a href="view.php?id=<?php echo $p['id']; ?>" class="text-gray-500 hover:text-primary" title="查看">
+                                                <a href="view.php?id=<?php echo $p['id']; ?>" class="text-gray-500 hover:text-primary" title="View">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <a href="edit.php?id=<?php echo $p['id']; ?>" class="text-gray-500 hover:text-primary" title="编辑">
+                                                <a href="edit.php?id=<?php echo $p['id']; ?>" class="text-gray-500 hover:text-primary" title="Edit">
                                                     <i class="fa fa-pencil"></i>
                                                 </a>
-                                                <a href="delete.php?id=<?php echo $p['id']; ?>" onclick="return confirm('确定要删除此商品吗？此操作不可撤销。')" class="text-gray-500 hover:text-danger" title="删除">
+                                                <a href="delete.php?id=<?php echo $p['id']; ?>" onclick="return confirm('Are you sure you want to delete this product? This action cannot be undone.')" class="text-gray-500 hover:text-danger" title="Delete">
                                                     <i class="fa fa-trash"></i>
                                                 </a>
                                             </div>
@@ -502,16 +489,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                                     </tr>
                                     <?php endforeach; ?>
                                     
-                                    <!-- 无数据时显示 -->
+                                    <!-- No data display -->
                                     <?php if (empty($products)): ?>
                                     <tr>
                                         <td colspan="8" class="py-6 text-center text-gray-500">
                                             <div class="flex flex-col items-center gap-3">
                                                 <i class="fa fa-shopping-bag text-4xl text-gray-300"></i>
-                                                <p>您还没有添加任何商品</p>
+                                                <p>You haven't added any products yet</p>
                                                 <a href="add.php" class="btn btn-primary">
                                                     <i class="fa fa-plus mr-1"></i>
-                                                    <span>添加第一个商品</span>
+                                                    <span>Add Your First Product</span>
                                                 </a>
                                             </div>
                                         </td>
@@ -522,10 +509,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         </form>
                     </div>
                     
-                    <!-- 分页 -->
+
                     <div class="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
                         <div class="text-sm text-gray-500">
-                            显示 <?php echo ($page - 1) * $limit + 1; ?>-<?php echo min($page * $limit, $total); ?> 条，共 <?php echo $total; ?> 条
+                            Showing <?php echo ($page - 1) * $limit + 1; ?>-<?php echo min($page * $limit, $total); ?> of <?php echo $total; ?> items
                         </div>
                         <div class="flex items-center gap-1">
                             <a href="manage.php?page=1" class="btn btn-secondary text-sm px-3 py-1">
@@ -561,7 +548,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     </div>
 
     <script>
-        // 侧边栏切换
+        // Sidebar toggle
         document.getElementById('sidebar-toggle').addEventListener('click', function() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -578,7 +565,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             overlay.classList.add('hidden');
         });
         
-        // 全选/取消全选
+        // Select all / Deselect all
         document.getElementById('select-all').addEventListener('change', function() {
             const checkboxes = document.querySelectorAll('.product-checkbox');
             checkboxes.forEach(checkbox => {
@@ -586,17 +573,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             });
         });
         
-        // 设置批量操作
+        // Set batch operation
         function setBatchAction(action) {
             const checkboxes = document.querySelectorAll('.product-checkbox:checked');
             const productIds = Array.from(checkboxes).map(cb => cb.value);
             
             if (productIds.length === 0) {
-                alert('请选择商品');
+                alert('Please select products');
                 return;
             }
             
-            if (action === 'delete' && !confirm('确定要删除选中的商品吗？此操作不可撤销。')) {
+            if (action === 'delete' && !confirm('Are you sure you want to delete the selected products? This action cannot be undone.')) {
                 return;
             }
             
@@ -604,7 +591,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             document.getElementById('batch-action-form').submit();
         }
         
-        // 筛选功能
+        // Filter functionality
         document.getElementById('filter-btn').addEventListener('click', function() {
             const search = document.getElementById('search-input').value;
             const category = document.getElementById('category-filter').value;
