@@ -24,18 +24,18 @@
 
 ## Table of Contents
 
-1. [Project Description](#-Project-Description)
-2. [Core Features](#-Core-features)
-3. [Tech Stack](#-Tech-Stack)
-4. [Quick Start](#-Quick-Start)
-5. [Design Inspiration](#-Design-Inspiration)
-6. [User Roles & Access](#-User-Roles--Access)
-7. [Project Structure](#-Project-Structure)
-8. [Database Schema](#-Database-Schema)
-9. [Development](#-Development)
-10. [Project Documentation](#-Project-Documentation)
-11. [Contributing](#-Contributing)
-12. [License](#-License)
+1. [Project Description](#project-description)
+2. [Core Features](#core-features)
+3. [Tech Stack](#tech-stack)
+4. [Quick Start](#quick-start)
+5. [Design Inspiration](#design-inspiration)
+6. [User Roles & Access](#user-roles-&-access)
+7. [Project Structure](#project-Structure)
+8. [Database Schema](#database-schema)
+9. [Development](#development)
+10. [Project Documentation](#project-documentation)
+11. [Contributing](#contributing)
+12. [License](#license)
 
 ---
 
