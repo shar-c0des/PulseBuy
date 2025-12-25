@@ -66,7 +66,7 @@
 
 ## Tech  Stack
 
-<div align="center">
+
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
@@ -77,7 +77,7 @@
 | *Scripting* | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black) | Interactive functionality |
 | *Containerization* | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | Development environment setup |
 
-</div>
+
 
 ---
 
