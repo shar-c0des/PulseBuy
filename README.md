@@ -53,15 +53,15 @@
 ---
 
 ## Core Features
-
+<div align='center'>
 | Category | Features |
 |----------|----------|
 | *User Management* | • Multi-role authentication system<br>• User registration & login<br>• Profile management<br>• Role-based access control |
 | *Product Management* | • Complete product catalog<br>• Add, edit, delete products<br>• Image upload functionality<br>• Inventory tracking |
-| *Shopping Experience** | • Interactive shopping cart<br>• Wishlist functionality<br>• Order processing workflow<br>• Payment integration |
-| *Analytics & Reports** | • Sales analytics dashboard<br>• Order history tracking<br>• Admin reporting system<br>• Performance metrics |
-| *Multi-Vendor Support** | • Dedicated seller dashboard<br>• Individual product management<br>• Sales tracking per seller<br>• Vendor performance reports |
-
+| *Shopping Experience* | • Interactive shopping cart<br>• Wishlist functionality<br>• Order processing workflow<br>• Payment integration |
+| *Analytics & Reports* | • Sales analytics dashboard<br>• Order history tracking<br>• Admin reporting system<br>• Performance metrics |
+| *Multi-Vendor Support* | • Dedicated seller dashboard<br>• Individual product management<br>• Sales tracking per seller<br>• Vendor performance reports |
+</div>
 ---
 
 ## Tech  Stack
@@ -70,12 +70,12 @@
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| *Backend** | ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat&logo=php&logoColor=white) | Server-side logic and API endpoints |
-| *Database** | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white) | Data storage and management |
-| *Frontend** | ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white) | Page structure and markup |
-| *Styling** | ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white) | Visual design and layout |
-| *Scripting** | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black) | Interactive functionality |
-| *Containerization** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | Development environment setup |
+| *Backend* | ![PHP](https://img.shields.io/badge/PHP-777BB4?style=flat&logo=php&logoColor=white) | Server-side logic and API endpoints |
+| *Database* | ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql&logoColor=white) | Data storage and management |
+| *Frontend* | ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white) | Page structure and markup |
+| *Styling* | ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white) | Visual design and layout |
+| *Scripting* | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black) | Interactive functionality |
+| *Containerization* | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | Development environment setup |
 
 </div>
 
@@ -391,6 +391,6 @@ For questions, suggestions, or support:
 
 ---
 
-*Last Updated: December 2024*
+*Last Updated: December 2025*
 
 </div>
