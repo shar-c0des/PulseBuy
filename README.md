@@ -53,7 +53,7 @@
 ---
 
 ## Core Features
-<div align='center'>
+
 | Category | Features |
 |----------|----------|
 | *User Management* | • Multi-role authentication system<br>• User registration & login<br>• Profile management<br>• Role-based access control |
@@ -61,12 +61,12 @@
 | *Shopping Experience* | • Interactive shopping cart<br>• Wishlist functionality<br>• Order processing workflow<br>• Payment integration |
 | *Analytics & Reports* | • Sales analytics dashboard<br>• Order history tracking<br>• Admin reporting system<br>• Performance metrics |
 | *Multi-Vendor Support* | • Dedicated seller dashboard<br>• Individual product management<br>• Sales tracking per seller<br>• Vendor performance reports |
-</div>
+
 ---
 
 ## Tech  Stack
 
-
+<div align="center">
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
@@ -77,7 +77,7 @@
 | *Scripting* | ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black) | Interactive functionality |
 | *Containerization* | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) | Development environment setup |
 
-
+</div>
 
 ---
 
