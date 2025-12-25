@@ -1,0 +1,82 @@
+# Dependencies
+vendor/
+node_modules/
+composer.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+error.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Build outputs
+build/
+dist/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads and user content (excluding demo images)
+uploads/*
+!uploads/.gitkeep
+src/uploads/*
+!src/uploads/.gitkeep
+
+# Session files
+sessions/
+
+# Cache files
+cache/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# PHP specific
+*.phar
+.phpunit.result.cache
+
+# Docker
+.docker/
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.bak
+*.backup
